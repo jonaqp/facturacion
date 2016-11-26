@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem name="Documentos Electronicos" id="document_electronic_parent_menu" sequence="1"/>
+
+        <menuitem name="Documentos Electronicos" parent="document_electronic_parent_menu" id="document_electronic_parent_menu_1" sequence="1"/>
+
+        <menuitem name="Comprobante de Retencion" parent="document_electronic_parent_menu" id="account_withhold_electronic_menu" sequence="1"/>
+        <menuitem name="Guias de Remision" parent="document_electronic_parent_menu" id="remission_guide_electronic_menu" sequence="1"/>
+        <menuitem id="settings_electronic_parent" name="Configuracion" parent="document_electronic_parent_menu"/>
+
+    </data>
+</odoo>

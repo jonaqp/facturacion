@@ -1,0 +1,53 @@
+<openerp>
+    <data>
+		<record model="ir.ui.view" id="payment_method_tree_view">
+			<field name="name">payment.method.tree</field>
+			<field name="model">payment.method</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="code"/>
+					<field name="name"/>
+				</tree>
+			</field>
+		</record>
+		<record model="ir.ui.view" id="payment_method_form_view">
+			<field name="name">payment.method.form</field>
+			<field name="model">payment.method</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+			<form>
+				<sheet string="Forma de Pago">
+					<field name="code"/>
+					<field name="name"/>
+				</sheet>
+			  </form>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_payment_method_tree_view">
+			<field name="name">Formas de Pago</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">payment.method</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_id" ref="payment_method_tree_view"/>
+		</record>
+
+		<record id="action_payment_method_tree" model="ir.actions.act_window.view">
+			<field eval="1" name="sequence" />
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="payment_method_tree_view" />
+			<field name="act_window_id" ref="action_payment_method_tree_view" />
+		</record>
+
+		<record id="action_payment_method_form" model="ir.actions.act_window.view">
+			<field eval="1" name="sequence" />
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="payment_method_form_view" />
+			<field name="act_window_id" ref="action_payment_method_tree_view" />
+		</record>
+        <menuitem name="Formas de Pago" id="payment_method_parent" parent="core_electronic_authorization.document_electronic_parent_menu" sequence="3"/>
+        <menuitem name="Formas de Pago" id="payment_method" parent="payment_method_parent" sequence="1" action="action_payment_method_tree_view"/>
+    </data>
+</openerp>

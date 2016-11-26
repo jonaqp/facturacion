@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="digital_signature_tree_view">
+            <field name="name">digital.signature.tree</field>
+            <field name="model">digital.signature</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="expiration_date"/>
+                    <field name="electronic_signature" filename="name"/>
+                    <field name="email_notification"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="digital_signature_form_view">
+            <field name="name">digital.signature.form</field>
+            <field name="model">digital.signature</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form create="false">
+                    <sheet string="Firma Digital">
+                        <group colspan="4" col="4">
+                            <field name="name"/>
+                            <field name="electronic_signature" filename="name"/>
+                            <field name="expiration_date" />
+                            <field name="password_signature" password="True"/>
+                            <field name="email_notification"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_digital_signature" model="ir.actions.act_window">
+            <field name="name">Firma Digital</field>
+            <field name="res_model">digital.signature</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="digital_signature_tree_view"/>
+        </record>
+
+        <menuitem id="setting_digital_signature_menu" name="Firma Digital" parent="core_electronic_authorization.settings_electronic_parent" action="action_digital_signature"/>
+    </data>
+</odoo>

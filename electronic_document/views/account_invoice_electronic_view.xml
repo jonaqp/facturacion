@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+		<record model="ir.ui.view" id="account_invoice_electronic_tree_view">
+			<field name="name">account.invoice.electronic.tree</field>
+			<field name="model">account.invoice.electronic</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree create="false" edit="false" string="Factura"  colors="blue:state =='loaded';red:state== 'unauthorized' ;purple:state =='in_process'">
+					<field name="emission_date"/>
+					<field name="number"/>
+					<field name="partner_id"/>
+					<field name="access_key" />
+					<field name="state" />
+					<field name="sent"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="account_invoice_electronic_form_view">
+			<field name="name">account.invoice.electronic.form</field>
+			<field name="model">account.invoice.electronic</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+			<form create="false" edit="false" string="Factura" version="7.0">
+				<header>
+					<button name="authorization_document_button" attrs="{'invisible': [('state','=','authorized')]}"  string="Autorizar comprobante" class="oe_highlight" type="object"/>
+					<button name="send_mail_document" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />
+					<!--<button name="imprimirReporte" string="Imprimir RIDE" class="oe_highlight" type="object" states="loaded,authorized" context="{'type':'factura'}" />-->
+					<field name="state" widget="statusbar" statusbar_visible="loaded,authorized,unauthorized" nolabel="1" />
+				</header>
+				<sheet string="Factura">
+					<h1>
+						<p>Factura</p>
+						<field name="number" class="oe_inline"/>
+					</h1>
+					<group string="Información" colspan="4">
+						<group colspan="4" col="4">
+							<field name="partner_id"/>
+							<field name="vat"/>
+							<field name="emission_date"/>
+							<field name="email"/>
+							<field name="street"/>
+							<field name="sent"/>
+						</group>
+						<group colspan="4">
+							<notebook>
+								<page string="Detalles" >
+									<field name="line_id">
+										<tree string="Lineas de factura" editable="top">
+											<field name="code"/>
+											<field name="name"/>
+											<field name="quantity"/>
+											<field name="price_unit"/>
+											<field name="discount"/>
+											<field name="total"/>
+										</tree>
+										<form string="Lineas de factura" >
+											<group>
+												<field name="code"/>
+												<field name="name"/>
+												<field name="quantity"/>
+												<field name="price_unit"/>
+												<field name="discount"/>
+												<field name="total"/>
+											</group>>
+										</form>
+									</field>
+									 <group class="oe_subtotal_footer oe_right">
+										<field name="subtotal_taxed" />
+										<field name="subtotal_0" />
+										<field name="subtotal" />
+										<field name="total_discount" />
+										<field name="taxed" />
+										<field name="total" />
+									</group>
+								</page>
+								<page string="S.R.I">
+									<group  colspan="2" >
+										<field name="type" invisible="1"/>
+										<field name ="electronic_authorization" />
+										<field name="access_key" />
+										<field name="authorization_date"/>
+										<field name="xml_report" filename="xml_report"/>
+										<field name="xml_name" invisible="1"/>
+									</group>
+									<group colspan="2" String ="Detalle de validación">
+											<field name="motive" nolabel="1" />
+									</group>
+								</page>
+								<page string="Información adicional">
+									<field name="note" nolabel="1"/>
+								</page>
+							</notebook>
+						</group>
+					</group>
+				</sheet>
+			</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="account_invoice_electronic_search_view">
+			<field name="name">account.invoice.electronic.form</field>
+			<field name="model">account.invoice.electronic</field>
+			<field name="type">search</field>
+			<field name="arch" type="xml">
+			<search string="Facturas">
+			   <field name="number" filter_domain="[('number','ilike',self)]"/>
+			   <field name="partner_id" filter_domain="[('partner_id','ilike',self)]"/>
+			   <field name="vat" filter_domain="[('identificacioncomprador','ilike',self)]"/>
+			   <field name="emission_date" filter_domain="[('fechaemision','ilike',self)]"/>
+			   <field name="state" filter_domain="[('state','ilike',self)]"/>
+			   <separator/>
+			   <group expand="0" string="Agrupar por...">
+				   <filter string="Cliente" context="{'group_by': 'partner_id'}"/>
+				   <filter string="RUC /CI" context="{'group_by': 'vat'}"/>
+				   <filter string="Estado" context="{'group_by': 'state'}"/>
+				   <filter string="Fecha de emisión" context="{'group_by': 'emission_date'}"/>
+			   </group>
+			   </search>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_account_invoice_electronic_tree_view">
+			<field name="name">Facturas</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">account.invoice.electronic</field>
+			<field name="domain">[('type','=','factura')]</field>
+			<field name="context">{'type':'factura'}</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_id" ref="account_invoice_electronic_tree_view"/>
+			<field name="search_view_id" ref="account_invoice_electronic_search_view"/>
+		</record>
+
+		<record id="action_invoice_electronic_tree" model="ir.actions.act_window.view">
+			<field eval="1" name="sequence" />
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="account_invoice_electronic_tree_view" />
+			<field name="act_window_id" ref="action_account_invoice_electronic_tree_view" />
+		</record>
+
+		<record id="action_invoice_electronic_form" model="ir.actions.act_window.view">
+			<field eval="1" name="sequence" />
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="account_invoice_electronic_form_view" />
+			<field name="act_window_id" ref="action_account_invoice_electronic_tree_view" />
+		</record>
+
+		<menuitem id="account_invoice_electronic_menu" name="Facturas" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_account_invoice_electronic_tree_view" sequence="1"/>
+			
+		<!-- Nota de crédito-->
+		<record model="ir.ui.view" id="account_invoice_electronic_nc_tree_view">
+			<field name="name">account.invoice.electronic.tree</field>
+			<field name="model">account.invoice.electronic</field>
+			<field name="type">tree</field>
+			<field name="priority" eval="10"/>
+			<field name="arch" type="xml">
+				<tree create="false" edit="false" string="Nota de crédito"  colors="blue:state =='loaded';red:state =='unauthorized';purple:state=='in_process'">
+					<field name="emission_date"/>
+					<field name="number"/>
+					<field name="partner_id"/>
+					 <field name="access_key" />
+					<field name="state" />
+					<field name="sent" />
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="account_invoice_electronic_nc_form_view">
+			<field name="name">account.invoice.electronic.form</field>
+			<field name="model">account.invoice.electronic</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form create="false" edit="false" string="Nota crédito" version="7.0">
+					<header>
+						<button name="authorization_document_button" attrs="{'invisible': [('state','=','authorized')]}"  string="Autorizar comprobante" class="oe_highlight" type="object"/>
+						<button name="send_mail_document" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />						<!--<button name="action_invoice_ext_sent" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />
+						<button name="imprimirReporte" string="Imprimir RIDE" class="oe_highlight" type="object" states="loaded,authorized" />
+						--><field name="state" widget="statusbar" statusbar_visible="loaded,authorized,unauthorized" nolabel="1"/>
+					</header>
+					<sheet string="Nota crédito">
+						<h1>
+							<label string="Nota de crédito"/>
+							<field name="number" class="oe_inline"/>
+						</h1>
+						<group string="Información" colspan="4">
+							<group colspan="4" col="4">
+								<field name="partner_id"/>
+								<field name="vat"/>
+								<field name="email"/>
+								<field name="emission_date"/>
+								<field name="street"/>
+							</group>
+							<group colspan="4" col="4">
+								<field name="number_fact"/>
+								<field name="number_fact_date"/>
+								<field name="motive"/>
+								<field name="sent"/>
+							</group>
+							<group colspan="4">
+								<notebook>
+									<page string="Detalles" >
+										<field name="line_id">
+											<tree string="Lineas de nota credito" editable="top">
+												<field name="code"/>
+												<field name="name"/>
+												<field name="quantity"/>
+												<field name="price_unit"/>
+												<field name="discount"/>
+												<field name="total"/>
+											</tree>
+											<form string="Lineas de nota credito" >
+												<field name="code"/>
+												<field name="name"/>
+												<field name="quantity"/>
+												<field name="price_unit"/>
+												<field name="discount"/>
+												<field name="total"/>
+											</form>
+										</field>
+										 <group class="oe_subtotal_footer oe_right">
+											<field name="subtotal_taxed" />
+											<field name="subtotal_0" />
+											<field name="subtotal" />
+											<field name="total_discount" />
+											<field name="taxed" />
+											<field name="total" />
+										</group>
+									</page>
+									<page string="S.R.I" >
+										<group colspan="2" >
+											<field name="type" invisible="1"/>
+											<field name="electronic_authorization" />
+											<field name="access_key" />
+											<field name="authorization_date"/>
+											<field name="xml_report" filename="xml_report"/>
+											<field name="xml_name" invisible="1"/>
+										</group>
+										<group colspan="2" String ="Detalle de validación">
+											<field name="motive" nolabel="1" />
+										</group>
+									</page>
+									<page string="Información adicional">
+										<field name="note" nolabel="1"/>
+									</page>
+								</notebook>
+							</group>
+						</group>
+				   </sheet>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="account_invoice_electronic_nc_search_view">
+			<field name="name">account.invoice.electronic.form</field>
+			<field name="model">account.invoice.electronic</field>
+			<field name="type">search</field>
+			<field name="arch" type="xml">
+			<search string="Nota de Crédito">
+			   <field name="number" filter_domain="[('number','ilike',self)]"/>
+			   <field name="partner_id" filter_domain="[('partner_id','ilike',self)]"/>
+			   <field name="vat" filter_domain="[('identificacioncomprador','ilike',self)]"/>
+			   <field name="emission_date" filter_domain="[('fechaemision','ilike',self)]"/>
+			   <field name="state" filter_domain="[('state','ilike',self)]"/>
+			   <separator/>
+			   <group expand="0" string="Agrupar por...">
+				   <filter string="Cliente" context="{'group_by': 'partner_id'}"/>
+				   <filter string="RUC /CI" context="{'group_by': 'vat'}"/>
+				   <filter string="Estado" context="{'group_by': 'state'}"/>
+				   <filter string="Fecha de emisión" context="{'group_by': 'emission_date'}"/>
+			   </group>
+			   </search>
+			</field>
+		</record>
+            
+		<record model="ir.actions.act_window" id="action_account_invoice_electronic_nc_tree_view">
+			<field name="name">Notas de crédito</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">account.invoice.electronic</field>
+			<field name="domain">[('type','=','credito')]</field>
+			<field name="context">{'type':'credito'}</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_id" ref="account_invoice_electronic_nc_tree_view"/>
+		</record>
+			
+		<record id="action_invoice_electronic_nc_tree" model="ir.actions.act_window.view">
+			<field eval="1" name="sequence" />
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="account_invoice_electronic_nc_tree_view" />
+			<field name="act_window_id" ref="action_account_invoice_electronic_nc_tree_view" />
+		</record>
+
+		<record id="action_invoice_electronic_nc_form" model="ir.actions.act_window.view">
+			<field eval="1" name="sequence" />
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="account_invoice_electronic_nc_form_view" />
+			<field name="act_window_id" ref="action_account_invoice_electronic_nc_tree_view" />
+		</record>
+			
+		<menuitem id="account_invoice_electronic_nc_menu" name="Notas de crédito" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_account_invoice_electronic_nc_tree_view" sequence="2"/>
+
+    	<!--  Nota de débito -->
+		<record model="ir.ui.view" id="account_debit_electronic_tree_view">
+			<field name="name">account.invoice.electronic.tree</field>
+			<field name="model">account.invoice.electronic</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree create="false" edit="false" string="Nota de débito"  colors="blue:state == 'loaded';red:state == 'unauthorized';purple:state=='in_process'">
+					<field name="emission_date"/>
+					<field name="number"/>
+					<field name="partner_id"/>
+					<field name="access_key" />
+					<field name="state" />
+					<field name="sent"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="account_debit_electronic_form_view">
+			<field name="name">account.invoice.electronic.form</field>
+			<field name="model">account.invoice.electronic</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+			<form create="false" edit="false" string="Nota de débito" version="7.0">
+				<header>
+					<button name="authorization_document_button" attrs="{'invisible': [('state','=','authorized')]}"  string="Autorizar comprobante" class="oe_highlight" type="object"/>
+					<button name="send_mail_document" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />
+					<!--<button name="imprimirReporte" string="Imprimir RIDE" class="oe_highlight" type="object" states="loaded,authorized"/>
+					--><field name="state" widget="statusbar" statusbar_visible="loaded,authorized,unauthorized" nolabel="1" />
+				</header>
+				<sheet string="Nota de débito">
+					<h1>
+						<label string="Nota de débito"/>
+						<field name="number" class="oe_inline"/>
+					</h1>
+					<group colspan="4" col="4">
+						<field name="partner_id"/>
+						<field name="vat"/>
+						<field name="email"/>
+						<field name="emission_date"/>
+						<field name="street"/>
+						<field name="number_fact"/>
+						<field name="sent"/>
+					</group>
+					<group col="4">
+						<group string="Razón de modificación" colspan="2">
+							<field nolabel="1" name="motive"/>
+						</group>
+						<group string="Valor de la  modificación" colspan="2">
+							<field nolabel="1" name="motive"/>
+						</group>
+					</group>
+					<newline />
+					<group class="oe_subtotal_footer oe_right">
+						 <field name="subtotal_taxed" />
+						 <field name="subtotal_0" />
+						 <field name="subtotal" />
+						 <field name="taxed" />
+						 <field name="total" />
+				   </group>
+					<group colspan="4">
+						<notebook>
+							<page  string="S.R.I" >
+								<group colspan="2" >
+									<field name="type" invisible="1"/>
+									<field name ="electronic_authorization" />
+									<field name="access_key"/>
+									<field name="authorization_date"/>
+									<field name="xml_report" filename="xml_report"/>
+									<field name="xml_name" invisible="1"/>
+								</group>
+								<group colspan="2" String ="Detalle de validación">
+									<field name="note" nolabel="1" />
+								</group>
+							</page>
+						</notebook>
+					</group>
+				</sheet>
+			  </form>
+			</field>
+		</record>
+
+	    <record model="ir.ui.view" id="account_invoice_electronic_debit_search_view">
+			<field name="name">account.invoice.electronic.form</field>
+			<field name="model">account.invoice.electronic</field>
+			<field name="type">search</field>
+			<field name="arch" type="xml">
+				<search string="Nota de débito">
+					<field name="number" filter_domain="[('number','ilike',self)]"/>
+					<field name="partner_id" filter_domain="[('partner_id','ilike',self)]"/>
+					<field name="vat" filter_domain="[('vat','ilike',self)]"/>
+					<field name="emission_date" filter_domain="[('emission_date','ilike',self)]"/>
+					<field name="state" filter_domain="[('state','ilike',self)]"/>
+					<separator/>
+					<group expand="0" string="Agrupar por...">
+						<filter string="Cliente" context="{'group_by': 'partner_id'}"/>
+						<filter string="Estado" context="{'group_by': 'state'}"/>
+						<filter string="Fecha de emisión" context="{'group_by': 'emission_date'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+            
+		<record model="ir.actions.act_window" id="action_account_invoice_electronic_nd_tree_view">
+			<field name="name">Notas de débito</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">account.invoice.electronic</field>
+			<field name="domain">[('type','=','debit')]</field>
+			<field name="context">{'type':'debit'}</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_id" ref="account_debit_electronic_form_view"/>
+		</record>
+			
+		<record id="action_invoice_electronic_nd_tree" model="ir.actions.act_window.view">
+			<field eval="1" name="sequence" />
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="account_debit_electronic_tree_view" />
+			<field name="act_window_id" ref="action_account_invoice_electronic_nd_tree_view" />
+		</record>
+
+		<record id="action_invoice_electronic_nd_form" model="ir.actions.act_window.view">
+			<field eval="1" name="sequence" />
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="account_debit_electronic_form_view" />
+			<field name="act_window_id" ref="action_account_invoice_electronic_nd_tree_view" />
+		</record>
+			
+		<menuitem id="account_invoice_ext_nd_menu" name="Notas de débito" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_account_invoice_electronic_nd_tree_view" sequence="3"/>
+    </data>
+</odoo>

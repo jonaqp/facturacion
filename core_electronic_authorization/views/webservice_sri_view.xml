@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="webservice_sri_tree_view">
+            <field name="name">webservice.sri.tree</field>
+            <field name="model">webservice.sri</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="url_reception"/>
+                    <field name="state_url_reception"/>
+                    <field name="url_authorization"/>
+                    <field name="state_url_authorization"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="webservice_sri_form_view">
+            <field name="name">webservice.sri.form</field>
+            <field name="model">webservice.sri</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form create="false">
+                    <sheet string="Webservices SRI">
+                        <group>
+                            <field name="name"/>
+                            <field name="environment"/>
+                            <field name="activo"/>
+                        </group>
+                        <group colspan="4" col="4">
+                            <field name="url_reception"/>
+                            <field name="url_authorization"/>
+                            <field name="state_url_reception"/>
+                            <field name="state_url_authorization"/>
+                            <field name="motive_reception"/>
+                            <field name="motive_authorization"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_webservice_sri" model="ir.actions.act_window">
+            <field name="name">WebServices SRI</field>
+            <field name="res_model">webservice.sri</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="webservice_sri_tree_view"/>
+        </record>
+
+        <menuitem id="setting_webservice_sri_menu" name="Webservices" parent="core_electronic_authorization.settings_electronic_parent" action="action_webservice_sri"/>
+    </data>
+</odoo>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="setting_read_file_tree_view">
+            <field name="name">setting.read.file.tree</field>
+            <field name="model">setting.read.file</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree create="false">
+                    <field name="delimiter"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="setting_read_file_form_view">
+            <field name="name">setting.read.file.form</field>
+            <field name="model">setting.read.file</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form create="false">
+                    <sheet string="Configuracion Carga de Archivos">
+                        <group colspan="4" col="4">
+                            <field name="delimiter"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_setting_read_file" model="ir.actions.act_window">
+            <field name="name">Configuracion Carga de Archivos</field>
+            <field name="res_model">setting.read.file</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="setting_read_file_tree_view"/>
+        </record>
+
+        <menuitem id="setting_read_file_menu" name="Delimitador de Archivo" parent="core_electronic_authorization.settings_electronic_parent" action="action_setting_read_file"/>
+
+    </data>
+</odoo>

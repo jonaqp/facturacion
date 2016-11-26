@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="remission_guide_electronic_tree_view">
+            <field name="name">remission.guide.electronic.tree</field>
+            <field name="model">remission.guide.electronic</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree create="false" edit="false" string="Comprobante de retención"  colors="blue:state =='loaded';red:state== 'unauthorized' ;purple:state =='in_process'">
+                    <field name="emission_date_start"/>
+                    <field name="number"/>
+                    <field name="partner_id"/>
+                    <field name="access_key" />
+                    <field name="state" />
+                    <field name="sent" />
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="remission_guide_electronic_form_view">
+            <field name="name">remission.guide.electronic.form</field>
+            <field name="model">remission.guide.electronic</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form create="false" string="Comprobantes de retenciones" version="7.0">
+                    <header>
+                        <button name="authorization_document_button" attrs="{'invisible': [('state','=','authorized')]}"  string="Autorizar comprobante" class="oe_highlight" type="object"/>
+                        <button name="send_mail_document" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />
+                        <!--<button name="imprimirReporte" string="Imprimir RIDE" class="oe_highlight" type="object" states="loaded,authorized"/>
+                        --><field name="state" statusbar_visible="loaded,authorized,unauthorized" widget="statusbar" nolabel="1" />
+                    </header>
+                    <sheet string="Guias de remision">
+                        <h1>
+                            <p>Guia Numero</p>
+                            <field name="number" class="oe_inline"/>
+                        </h1>
+                        <group string="Información" colspan="4">
+                            <group colspan="4" col="4">
+                                <field name="partner_id"/>
+                                <field name="vat"/>
+                                <field name="emission_date_start"/>
+                                <field name="email"/>
+                                <field name="emission_date_stop"/>
+                                <field name="sent" />
+                            </group>
+                            <group colspan="4" col="4">
+                                <field name="ruc_carrier"/>
+                                <field name="social_name"/>
+                                <field name="invoice"/>
+                                <field name="start_street"/>
+                                <field name="street"/>
+                                <field name="partner_id"/>
+                            </group>
+                            <notebook>
+                                <page string="Detalles">
+                                    <field name="line_id">
+                                        <tree string="Detalle Guias" editable="top">
+                                            <field name="code"/>
+                                            <field name="name"/>
+                                            <field name="quantity"/>
+                                        </tree>
+                                        <form string="Detalle retención" >
+                                            <group>
+                                                <field name="code"/>
+                                                <field name="name"/>
+                                                <field name="quantity"/>
+                                            </group>
+                                        </form>
+                                    </field>
+                                </page>
+                                <page string="S.R.I">
+                                    <group  colspan="2" >
+                                            <field name ="electronic_authorization" />
+                                             <field name="access_key" />
+                                            <field name="authorization_date"/>
+                                    </group>
+                                    <group colspan="2" String ="Detalle de validación">
+                                            <field name="note" nolabel="1" />
+                                    </group>
+                                </page>
+                            </notebook>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="remission_guide_electronic_search_view">
+            <field name="name">remission.guide.electronic.form</field>
+            <field name="model">remission.guide.electronic</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+               <search string="Guias de Remision">
+               <field name="number" filter_domain="[('number','ilike',self)]"/>
+               <field name="partner_id" filter_domain="[('partner_id','ilike',self)]"/>
+               <field name="vat" filter_domain="[('vat','ilike',self)]"/>
+               <field name="ruc_carrier" filter_domain="[('ruc_carrier','ilike',self)]"/>
+               <field name="emission_date_start" filter_domain="[('emission_date_start','ilike',self)]"/>
+               <field name="state" filter_domain="[('state','ilike',self)]"/>
+               <separator/>
+               <group expand="0" string="Agrupar por...">
+                   <filter string="Cliente" context="{'group_by': 'partner_id'}"/>
+                   <filter string="Estado" context="{'group_by': 'state'}"/>
+                   <filter string="Fecha de emisión" context="{'group_by': 'emission_date_start'}"/>
+               </group>
+               </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_remission_guide_electronic_tree_view">
+            <field name="name">Guias de Remision</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">remission.guide.electronic</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="remission_guide_electronic_tree_view"/>
+        </record>
+
+        <menuitem id="remission_guide_electronic_menu" name="Guias de remision" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_remission_guide_electronic_tree_view" sequence="5"/>
+    </data>
+</odoo>

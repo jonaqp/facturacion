@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<odoo>
+  <data noupdate="1">
+
+  	<record model="payment.method" id="method1">
+        <field name="code">01</field>
+        <field name="name">SIN UTILIZACION DEL SISTEMA FINANCIERO</field>
+    </record>
+    <record model="payment.method" id="method2">
+        <field name="code">16</field>
+        <field name="name">TARJETA DE DEBITO</field>
+    </record>
+    <record model="payment.method" id="method3">
+        <field name="code">17</field>
+        <field name="name">DINERO ELECTRONICO</field>
+    </record>
+    <record model="payment.method" id="method4">
+        <field name="code">18</field>
+        <field name="name">TARJETA PREPAGO</field>
+    </record>
+    <record model="payment.method" id="method5">
+        <field name="code">19</field>
+        <field name="name">TARJETA DE CREDITO</field>
+    </record>
+    <record model="payment.method" id="method6">
+        <field name="code">20</field>
+        <field name="name">OTROS CON UTILIZACION DEL SISTEMA FINANCIERO</field>
+    </record>
+    <record model="payment.method" id="method7">
+        <field name="code">21</field>
+        <field name="name">ENDOSO DE TITULOS</field>
+    </record>
+   </data>
+</odoo>

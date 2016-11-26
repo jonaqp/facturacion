@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<openerp>
+  <data noupdate="1">
+  	<record model="setting.read.file" id="shap_wap_1">
+        <field name="delimiter">|</field>
+    </record>
+   </data>
+</openerp>

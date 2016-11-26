@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="read_file_document_tree_view">
+            <field name="name">file.documents.tree</field>
+            <field name="model">file.documents</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="created_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="read_file_document_form_view">
+            <field name="name">file.documents.form</field>
+            <field name="model">file.documents</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form create="false" edit="false" string="Factura" version="7.0">
+                    <sheet string="Archivos">
+                        <h1>
+                            <label string="Archivos"/>
+                        </h1>
+                        <group string="Información" colspan="4">
+                            <group colspan="4" col="4">
+                                <field name="name"/>
+                                <field name="data"/>
+                                <field name="created_date"/>
+                            </group>
+
+                        </group>
+                        <group colspan="2">
+                            <field name="errors"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_read_file_document" model="ir.actions.act_window">
+            <field name="name">Subir Archivos</field>
+            <field name="res_model">file.documents</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="read_file_document_tree_view"/>
+        </record>
+
+        <menuitem id="read_file_document_menu_parent" name="Archivos" parent="core_electronic_authorization.document_electronic_parent_menu" sequence="2"/>
+        <menuitem id="read_file_document_menu" name="Subir Archivo" parent="read_file_document_menu_parent" action="action_read_file_document"/>
+
+    </data>
+</odoo>
