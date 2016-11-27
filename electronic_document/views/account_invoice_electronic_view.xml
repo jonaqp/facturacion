@@ -86,7 +86,7 @@
 										<field name="xml_name" invisible="1"/>
 									</group>
 									<group colspan="2" String ="Detalle de validación">
-											<field name="motive" nolabel="1" />
+											<field name="sri_response" nolabel="1" />
 									</group>
 								</page>
 								<page string="Información adicional">
@@ -239,7 +239,7 @@
 											<field name="xml_name" invisible="1"/>
 										</group>
 										<group colspan="2" String ="Detalle de validación">
-											<field name="motive" nolabel="1" />
+											<field name="sri_response" nolabel="1" />
 										</group>
 									</page>
 									<page string="Información adicional">

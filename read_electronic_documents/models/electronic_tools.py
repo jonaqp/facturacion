@@ -6,7 +6,7 @@ read documents from a database, search partner, payment_method
 """
 
 import re
-from odoo.addons_local.core_electronic_authorization.authorization_sri import generate_access_key
+from core_electronic_authorization.authorization_sri import generate_access_key
 import plantilla_factura
 import plantilla_retencion
 import plantilla_guia

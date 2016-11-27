@@ -2,7 +2,7 @@
 
 from odoo import fields, models, api
 from datetime import datetime
-from odoo.addons_local.core_electronic_authorization.authorization_sri import authorization_document
+from core_electronic_authorization.authorization_sri import authorization_document
 
 
 class AccountInvoiceElectronic(models.Model):
@@ -27,7 +27,7 @@ class AccountInvoiceElectronic(models.Model):
     xml_report = fields.Binary(string="Archivo XML")
     xml_name = fields.Char(string="Archivo XML")
     state = fields.Selection([('authorized', 'Autorizado'),
-                              ('unathorized', 'No autorizado'),
+                              ('unauthorized', 'No autorizado'),
                               ('loaded', 'Por Autorizar')], string="Estado", default='loaded')
     subtotal = fields.Float(string="Subtotal", required=True)
     subtotal_0 = fields.Float(string="Subtotal 0%", required=True)

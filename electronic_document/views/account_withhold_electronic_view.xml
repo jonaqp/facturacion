@@ -73,7 +73,7 @@
                                             <field name="authorization_date"/>
                                     </group>
                                     <group colspan="2" String ="Detalle de validación">
-                                            <field name="note" nolabel="1" />
+                                            <field name="sri_response" nolabel="1" />
                                     </group>
                                 </page>
                             </notebook>

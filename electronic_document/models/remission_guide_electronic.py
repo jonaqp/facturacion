@@ -2,7 +2,7 @@
 
 from odoo import models, fields, api
 from datetime import datetime
-from odoo.addons_local.core_electronic_authorization.authorization_sri import authorization_document
+from core_electronic_authorization.authorization_sri import authorization_document
 
 
 class RemissionGuideElectronic(models.Model):

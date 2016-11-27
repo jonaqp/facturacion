@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """"
-AUTORIZACION CON EL SRI: CREACION DEL XML, WEBSERVICES
+AUTORIZACION CON EL SRI, CREACION DEL XML, WEBSERVICES
 """
 from odoo import models, fields, api
 from odoo.exceptions import UserError
@@ -102,16 +102,15 @@ def do_digital_signature(obj, document_xml, type_document):
         raise UserError("No tiene una firma digital configurada")
     path, key = digital_signature.path_digital_signature, digital_signature.password_signature
     path_in_xml = open("in_xml.xml", "w")
-    document_xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' + tostring(document_xml)
+    document_xml = '<?xml version="1.0" encoding="UTF-8" ?>' + tostring(document_xml)
+    document_xml = document_xml
     path_in_xml.write(document_xml)
     path_in_xml.close()
     current_directory = os.getcwd()
-    path_out_xml = open('out_xml.xml', 'w+')
-    path_out_xml.close()
     try:
         gateway = JavaGateway(GatewayClient(port=10010))
         entrypt = gateway.entry_point.getGenericXMLSignature()
-        entrypt.execute('in_xml.xml', current_directory+'/', 'out_xml.xml', type_document, path, key)
+        entrypt.execute(current_directory+'/'+'in_xml.xml', current_directory+'/', 'out_xml.xml', type_document, path, key)
         document_xml = open('out_xml.xml', 'r')
         data = document_xml.read()
         document_xml.close()
@@ -160,7 +159,7 @@ def generate_xml_invoice(invoice, environment):
     SubElement(tributaria, "tipoEmision").text = '1'
     SubElement(tributaria, "razonSocial").text = invoice.company_id.name
     SubElement(tributaria, "nombreComercial").text = invoice.company_id.name
-    SubElement(tributaria, "ruc").text = invoice.company_id.partner_id.vat
+    SubElement(tributaria, "ruc").text = invoice.company_id.partner_id.vat[2:]
     SubElement(tributaria, "claveAcceso").text = clave_acceso
     SubElement(tributaria, "codDoc").text = cod_doc
     SubElement(tributaria, "estab").text = est
@@ -313,13 +312,24 @@ class WebserviceSri(models.Model):
                                     ('1', 'Pruebas')], string='Ambiente', required=True, default='2')
     activo = fields.Boolean(string="En uso")
 
-    def _format_response_sri(self, response):
-        pass
+    def _format_response_sri(self, response, reception=False):
+        result = {}
+        mensaje = response.comprobantes.comprobante[0].mensajes[0]
+        if mensaje[0].tipo == 'ERROR':
+            result['sri_response'] = mensaje[0].mensaje + mensaje[0].informacionAdicional
+            result['state'] = 'unauthorized'
+        elif not reception:
+            result['sri_response'] = 'DOCUMENTO AUTORIZADO'
+            result['state'] = 'authorized'
+            result['authorized_date'] = datetime.now()
+        else:
+            result['state'] = 'pass'
+        return result
 
     def send_xml_document_reception(self, xml_document):
         webservice = self.get_webservice_sri()
         sri_reception = Client(webservice.url_reception)
-        return self._format_response_sri(sri_reception.service.validarComprobante(xml_document))
+        return self._format_response_sri(sri_reception.service.validarComprobante(xml_document), reception=True)
 
     def send_xml_document_authorization(self, access_key):
         webservice = self.get_webservice_sri()
@@ -381,7 +391,7 @@ class DigitalSignature(models.Model):
         body = 'La firma digital expirara en %s dias' % days
         msg = ir_mail_server_obj.build_email(self, email_from, email_to, subject, body,
                                              subtype_alternative='plain')
-        message_id = ir_mail_server_obj.send_email(msg)
+        ir_mail_server_obj.send_email(msg)
 
     @api.model
     def send_mail_notification_expiration(self):
@@ -395,7 +405,7 @@ class DigitalSignature(models.Model):
     @api.model
     def create(self, values):
         with open(values.get('name'), 'w+') as fp:
-            fp.write(values['electronic_signature'])
+            fp.write(base64.b64decode(values['electronic_signature']))
         values['path_digital_signature'] = os.getcwd() + '/' + values.get('name')
         return super(DigitalSignature, self).create(values)
 
@@ -408,6 +418,6 @@ class DigitalSignature(models.Model):
     def write(self, values):
         if 'electronic_signature' in values:
             with open(values.get('name'), 'w+') as fp:
-                fp.write(values['electronic_signature'])
+                fp.write(base64.b64decode(values['electronic_signature']))
             values['path_digital_signature'] = os.getcwd() + '/' + values.get('name')
         return super(DigitalSignature, self).write(values)
