@@ -426,7 +426,7 @@
     <p style="border-left: 1px solid #8e0000; margin-left: 30px;">
        &nbsp;&nbsp;<strong>REFERENCIAS</strong><br />
        &nbsp;&nbsp;Numero de guia de remision: <strong>${object.number}</strong><br />
-       &nbsp;&nbsp;Fecha: ${object.emission_date_start}<br />
+       &nbsp;&nbsp;Fecha: ${object.emission_date}<br />
     </p>
                               </td>
                             </tbody>

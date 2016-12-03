@@ -2,7 +2,7 @@
 
 from odoo import models, fields, api
 from datetime import datetime
-from core_electronic_authorization.authorization_sri import authorization_document
+from core_electronic_authorization.authorization_sri import authorization_document, generate_access_key
 
 
 class RemissionGuideElectronic(models.Model):
@@ -11,44 +11,76 @@ class RemissionGuideElectronic(models.Model):
 
     _order = 'number desc'
 
-    number = fields.Char(string="Numero", size=17, required=True)
-    emission_date_start = fields.Date(string="Fecha Inicio Transporte", required=True, default=datetime.now)
-    emission_date_stop = fields.Date(string="Fecha Fin Transporte", required=True, default=datetime.now)
-    access_key = fields.Char(string="Clave de Acceso", size=49)
-    electronic_authorization = fields.Char(string="Autorización Electrónica", size=49)
-    authorization_date = fields.Datetime(string="Fecha y Hora de Autorización")
-    line_id = fields.One2many("remission.guide.electronic.line", "remission_id", required=True, string="Lineas")
-    partner_id = fields.Many2one("res.partner", string="Cliente", required=True)
-    vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat')
-    email = fields.Char(string="Email")
+    @api.model
+    def _get_company_id(self):
+        company_id = self.env['res.users'].browse(self._uid).company_id.id
+        return company_id
+
+    @api.model
+    def _get_number(self):
+        sequence = self.env['ir.sequence']
+        printer_point = self.env['res.users'].browse(self._uid).printer_point
+        return sequence.next_by_code('remission' + printer_point)
+
+    number = fields.Char(string="Numero", size=17, required=True, default=_get_number)
+    emission_date = fields.Date(string="Fecha Inicio Transporte", required=True, default=datetime.now,
+                                      states={'authorized': [('readonly', True)]})
+    emission_date_stop = fields.Date(string="Fecha Fin Transporte", required=True, default=datetime.now,
+                                     states={'authorized': [('readonly', True)]})
+    access_key = fields.Char(string="Clave de Acceso", size=49, states={'authorized': [('readonly', True)]})
+    electronic_authorization = fields.Char(string="Autorización Electrónica", size=49, states={'authorized': [('readonly', True)]})
+    authorization_date = fields.Datetime(string="Fecha y Hora de Autorización",states={'authorized': [('readonly', True)]})
+    line_id = fields.One2many("remission.guide.electronic.line", "remission_id", required=True, string="Lineas",
+                              states={'authorized': [('readonly', True)]})
+    partner_id = fields.Many2one("res.partner", string="Cliente", required=True, states={'authorized': [('readonly', True)]})
+    vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat', states={'authorized': [('readonly', True)]})
+    email = fields.Char(string="Email", states={'authorized': [('readonly', True)]}, related='partner_id.email')
     street = fields.Char(string="Dirección LLegada", related='partner_id.street')
-    sri_response = fields.Char(string="Respuesta SRI")
-    xml_report = fields.Binary(string="Archivo XML")
-    xml_name = fields.Char(string="Archivo XML")
+    sri_response = fields.Char(string="Respuesta SRI", states={'authorized': [('readonly', True)]})
+    xml_report = fields.Binary(string="Archivo XML", states={'authorized': [('readonly', True)]})
+    xml_name = fields.Char(string="Archivo XML", states={'authorized': [('readonly', True)]})
     state = fields.Selection([('authorized', 'Autorizado'),
                               ('unathorized', 'No autorizado'),
-                              ('loaded', 'Por Autorizar')], string="Estado", default='loaded')
-    note = fields.Text(string="Informacion Adicional")
-    motivo = fields.Text(string="Motivo")
-    invoice = fields.Char(string="Factura", size=17)
-    invoice_emission_date = fields.Date(string="Fecha Emision Factura")
-    ruc_carrier = fields.Char(string="RUC Transportista", required=True)
-    social_name = fields.Char(string="Razon Social Transportista", required=True)
-    start_street = fields.Char(string="Direccion Partida", required=True)
-    company_id = fields.Many2one('res.company', string="Compania", required=True)
-    sent = fields.Boolean(string="Enviado")
+                              ('loaded', 'Por Autorizar'),
+                              ('draft', 'Borrador')], string="Estado", default='draft')
+    note = fields.Text(string="Informacion Adicional", states={'authorized': [('readonly', True)]})
+    motivo = fields.Text(string="Motivo", states={'authorized': [('readonly', True)]})
+    invoice = fields.Char(string="Factura", size=17, states={'authorized': [('readonly', True)]})
+    invoice_emission_date = fields.Date(string="Fecha Emision Factura", states={'authorized': [('readonly', True)]})
+    ruc_carrier = fields.Char(string="RUC Transportista", required=True, states={'authorized': [('readonly', True)]})
+    social_name = fields.Char(string="Razon Social Transportista", required=True, states={'authorized': [('readonly', True)]})
+    start_street = fields.Char(string="Direccion Partida", required=True, states={'authorized': [('readonly', True)]})
+    company_id = fields.Many2one('res.company', string="Compania", required=True, states={'authorized': [('readonly', True)]}, default=_get_company_id)
+    sent = fields.Boolean(string="Enviado", states={'authorized': [('readonly', True)]})
+    lock = fields.Boolean(string='Bloqueado')
+
+    @api.one
+    def authorization_document_button(self):
+        if not self.lock:
+            self.lock = True
+            response = authorization_document(self)
+            self.write(response)
+            if response['state'] != 'authorized':
+                self.lock = False
 
     @api.multi
-    def authorization_document_button(self):
-        response = authorization_document(self)
-        self.write(response)
+    def change_state_to(self):
+        for remisison in self:
+            remisison.state = 'loaded'
+            access_key = generate_access_key(self, remisison)
+            remisison.access_key = access_key
+            remisison.electronic_authorization = access_key
 
     @api.multi
     def authorization_documents_cron(self, *args):
         remissions = self.search([('state', '=', 'loaded')], order='number asc')
         for remission in remissions:
-            response = authorization_document(remission)
-            remission.write(response)
+            if not remission.lock:
+                remission.lock = True
+                response = authorization_document(remission)
+                remission.write(response)
+                if response['state'] != 'authorized':
+                    remission.lock = False
 
     @api.multi
     def send_mail_document(self):

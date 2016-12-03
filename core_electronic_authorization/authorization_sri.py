@@ -36,6 +36,8 @@ def generate_access_key(obj, document_id):
     number = document_id.number
     if document_id._name == 'account.withhold.electronic':
         compr = '07'
+    elif document_id._name == 'remission.guide.electronic':
+        compr = '06'
     else:
         if document_id.type == 'factura':
             compr = '01'
@@ -246,6 +248,19 @@ def generate_xml_invoice(invoice, environment):
             SubElement(dtle_impuesto, "tarifa").text = get_percentage(line.tax)
             SubElement(dtle_impuesto, "baseImponible").text = str(round(line.price_unit * line.quantity, 2))
             SubElement(dtle_impuesto, "valor").text = str(line.total)
+    if type_document == "notaDebito":
+        detalle_impuestos = SubElement(factura, "impuestos")
+        dtle_impuesto = SubElement(detalle_impuestos, "impuesto")
+        SubElement(dtle_impuesto, "codigo").text = '2'  # impuesto iva
+        SubElement(dtle_impuesto, "codigoPorcentaje").text = '3'
+        SubElement(dtle_impuesto, "tarifa").text = '14'
+        SubElement(dtle_impuesto, "baseImponible").text = str(round(invoice.modification_value, 2))
+        SubElement(dtle_impuesto, "valor").text = str(invoice.taxed)
+        SubElement(factura, "valorTotal").text = str(round(invoice.total, 2))
+        detalle_movitos = SubElement(root, "motivos")
+        dtle_motivo = SubElement(detalle_movitos, "motivo")
+        SubElement(dtle_motivo, "razon").text = invoice.motive.encode('ascii', 'ignore')
+        SubElement(dtle_motivo, "valor").text = str(round(invoice.modification_value, 2))
     indent(root)
     return root, type_document
 

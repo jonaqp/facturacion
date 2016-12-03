@@ -6,7 +6,7 @@
             <field name="model">account.withhold.electronic</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree create="false" edit="false" string="Comprobante de retención"  colors="blue:state =='loaded';red:state== 'unauthorized' ;purple:state =='in_process'">
+                <tree string="Comprobante de retención"  colors="blue:state == 'draft';green:state =='loaded';red:state== 'unauthorized' ;purple:state =='in_process'">
                     <field name="emission_date"/>
                     <field name="number"/>
                     <field name="partner_id"/>
@@ -22,11 +22,12 @@
             <field name="model">account.withhold.electronic</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form create="false" string="Comprobantes de retenciones" version="7.0">
+                <form string="Comprobantes de retenciones" version="7.0">
                     <header>
-                        <button name="authorization_document_button" attrs="{'invisible': [('state','=','authorized')]}"  string="Autorizar comprobante" class="oe_highlight" type="object"/>
+                        <button name="authorization_document_button" states="loaded,unauthorized" string="Autorizar comprobante" class="oe_highlight" type="object"/>
                         <button name="send_mail_document" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />
-                        --><field name="state" statusbar_visible="loaded,authorized,unauthorized" widget="statusbar" nolabel="1" />
+                        <button name="change_state_to" string="Por Autorizar" class="oe_highlight" type="object" states="draft" />
+                        <field name="state" statusbar_visible="draft,loaded,authorized,unauthorized" widget="statusbar" nolabel="1" />
                     </header>
                     <sheet string="Comprobante retención">
                         <h1>
@@ -38,45 +39,50 @@
                                 <field name="partner_id"/>
                                 <field name="vat"/>
                                 <field name="emission_date"/>
-                                <field name="fiscalyear"/>
+                                <field name="fiscalyear" placeholder="mm/yyyy"/>
                                 <field name="email"/>
                                 <field name="street"/>
                                 <field name="sent" />
                             </group>
-                            <notebook>
-                                <page string="Detalles">
-                                    <field name="line_id">
-                                        <tree string="Detalle retención" editable="top">
-                                            <field name="name"/>
-                                            <field name="code"/>
-                                            <field name="num_fact"/>
-                                            <field name="base_amount"/>
-                                            <field name="tax_name"/>
-                                            <field name="tax"/>
-                                            <field name="tax_amount"/>
-                                        </tree>
-                                        <form string="Detalle retención" >
-                                            <field name="name"/>
-                                            <field name="code"/>
-                                            <field name="num_fact"/>
-                                            <field name="base_amount"/>
-                                            <field name="tax_name"/>
-                                            <field name="tax"/>
-                                            <field name="tax_amount"/>
-                                        </form>
-                                    </field>
-                                </page>
-                                <page string="S.R.I">
-                                    <group  colspan="2" >
-                                            <field name ="electronic_authorization" />
-                                             <field name="access_key" />
-                                            <field name="authorization_date"/>
-                                    </group>
-                                    <group colspan="2" String ="Detalle de validación">
-                                            <field name="sri_response" nolabel="1" />
-                                    </group>
-                                </page>
-                            </notebook>
+                            <group colspan="4">
+                                <notebook>
+                                    <page string="Detalles">
+                                        <field name="line_id">
+                                            <tree string="Detalle retención" editable="top">
+                                                <field name="name"/>
+                                                <field name="code"/>
+                                                <field name="num_fact"/>
+                                                <field name="base_amount"/>
+                                                <field name="tax_name"/>
+                                                <field name="tax"/>
+                                                <field name="tax_amount"/>
+                                            </tree>
+                                            <form string="Detalle retención" >
+                                                <field name="name"/>
+                                                <field name="code"/>
+                                                <field name="num_fact"/>
+                                                <field name="base_amount"/>
+                                                <field name="tax_name"/>
+                                                <field name="tax"/>
+                                                <field name="tax_amount"/>
+                                            </form>
+                                        </field>
+                                        <group class="oe_subtotal_footer oe_right">
+                                            <field name="total" />
+                                        </group>
+                                    </page>
+                                    <page string="S.R.I">
+                                        <group  colspan="2" >
+                                                <field name ="electronic_authorization" />
+                                                 <field name="access_key" />
+                                                <field name="authorization_date"/>
+                                        </group>
+                                        <group colspan="2" String ="Detalle de validación">
+                                                <field name="sri_response" nolabel="1" />
+                                        </group>
+                                    </page>
+                                </notebook>
+                            </group>
                         </group>
                     </sheet>
                 </form>

@@ -6,8 +6,8 @@
             <field name="model">remission.guide.electronic</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree create="false" edit="false" string="Comprobante de retención"  colors="blue:state =='loaded';red:state== 'unauthorized' ;purple:state =='in_process'">
-                    <field name="emission_date_start"/>
+                <tree string="Guia de remision"  colors="blue:state == 'draft';green:state =='loaded';red:state== 'unauthorized' ;purple:state =='in_process'">
+                    <field name="emission_date"/>
                     <field name="number"/>
                     <field name="partner_id"/>
                     <field name="access_key" />
@@ -22,12 +22,12 @@
             <field name="model">remission.guide.electronic</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
-                <form create="false" string="Comprobantes de retenciones" version="7.0">
+                <form string="Comprobantes de retenciones" version="7.0">
                     <header>
-                        <button name="authorization_document_button" attrs="{'invisible': [('state','=','authorized')]}"  string="Autorizar comprobante" class="oe_highlight" type="object"/>
+                        <button name="authorization_document_button" states="loaded,unauthorized" string="Autorizar comprobante" class="oe_highlight" type="object"/>
                         <button name="send_mail_document" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />
-                        <!--<button name="imprimirReporte" string="Imprimir RIDE" class="oe_highlight" type="object" states="loaded,authorized"/>
-                        --><field name="state" statusbar_visible="loaded,authorized,unauthorized" widget="statusbar" nolabel="1" />
+					    <button name="change_state_to" string="Por Autorizar" class="oe_highlight" type="object" states="draft" />
+                        <field name="state" statusbar_visible="draft,loaded,authorized,unauthorized" widget="statusbar" nolabel="1" />
                     </header>
                     <sheet string="Guias de remision">
                         <h1>
@@ -36,9 +36,8 @@
                         </h1>
                         <group string="Información" colspan="4">
                             <group colspan="4" col="4">
-                                <field name="partner_id"/>
                                 <field name="vat"/>
-                                <field name="emission_date_start"/>
+                                <field name="emission_date"/>
                                 <field name="email"/>
                                 <field name="emission_date_stop"/>
                                 <field name="sent" />
@@ -51,34 +50,36 @@
                                 <field name="street"/>
                                 <field name="partner_id"/>
                             </group>
-                            <notebook>
-                                <page string="Detalles">
-                                    <field name="line_id">
-                                        <tree string="Detalle Guias" editable="top">
-                                            <field name="code"/>
-                                            <field name="name"/>
-                                            <field name="quantity"/>
-                                        </tree>
-                                        <form string="Detalle retención" >
-                                            <group>
+                            <group colspan="4">
+                                <notebook>
+                                    <page string="Detalles">
+                                        <field name="line_id">
+                                            <tree string="Detalle Guias" editable="top">
                                                 <field name="code"/>
                                                 <field name="name"/>
                                                 <field name="quantity"/>
-                                            </group>
-                                        </form>
-                                    </field>
-                                </page>
-                                <page string="S.R.I">
-                                    <group  colspan="2" >
-                                            <field name ="electronic_authorization" />
-                                             <field name="access_key" />
-                                            <field name="authorization_date"/>
-                                    </group>
-                                    <group colspan="2" String ="Detalle de validación">
-                                            <field name="sri_response" nolabel="1" />
-                                    </group>
-                                </page>
-                            </notebook>
+                                            </tree>
+                                            <form string="Detalle retención" >
+                                                <group>
+                                                    <field name="code"/>
+                                                    <field name="name"/>
+                                                    <field name="quantity"/>
+                                                </group>
+                                            </form>
+                                        </field>
+                                    </page>
+                                    <page string="S.R.I">
+                                        <group  colspan="2" >
+                                                <field name ="electronic_authorization" />
+                                                 <field name="access_key" />
+                                                <field name="authorization_date"/>
+                                        </group>
+                                        <group colspan="2" String ="Detalle de validación">
+                                                <field name="sri_response" nolabel="1" />
+                                        </group>
+                                    </page>
+                                </notebook>
+                            </group>
                         </group>
                     </sheet>
                 </form>
@@ -95,13 +96,13 @@
                <field name="partner_id" filter_domain="[('partner_id','ilike',self)]"/>
                <field name="vat" filter_domain="[('vat','ilike',self)]"/>
                <field name="ruc_carrier" filter_domain="[('ruc_carrier','ilike',self)]"/>
-               <field name="emission_date_start" filter_domain="[('emission_date_start','ilike',self)]"/>
+               <field name="emission_date" filter_domain="[('emission_date','ilike',self)]"/>
                <field name="state" filter_domain="[('state','ilike',self)]"/>
                <separator/>
                <group expand="0" string="Agrupar por...">
                    <filter string="Cliente" context="{'group_by': 'partner_id'}"/>
                    <filter string="Estado" context="{'group_by': 'state'}"/>
-                   <filter string="Fecha de emisión" context="{'group_by': 'emission_date_start'}"/>
+                   <filter string="Fecha de emisión" context="{'group_by': 'emission_date'}"/>
                </group>
                </search>
             </field>

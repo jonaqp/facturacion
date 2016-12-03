@@ -2,46 +2,84 @@
 
 from odoo import models, fields, api
 from datetime import datetime
-from core_electronic_authorization.authorization_sri import authorization_document
+from core_electronic_authorization.authorization_sri import authorization_document, generate_access_key
 
 
 class AccountWithholdElectronic(models.Model):
     _name = 'account.withhold.electronic'
     _rec_name = 'number'
 
-    number = fields.Char(string="Numero", size=17, required=True)
-    emission_date = fields.Date(string="Fecha Emisión", required=True, default=datetime.now)
-    access_key = fields.Char(string="Clave de Acceso", size=49)
-    electronic_authorization = fields.Char(string="Autorización Electrónica", size=49)
-    authorization_date = fields.Datetime(string="Fecha y Hora de Autorización")
-    line_id = fields.One2many("account.withhold.electronic.line", "withhold_id", required=True, string="Lineas")
-    partner_id = fields.Many2one("res.partner", string="Cliente", required=True)
-    vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat')
-    email = fields.Char(string="Email")
+    @api.model
+    def _get_company_id(self):
+        company_id = self.env['res.users'].browse(self._uid).company_id.id
+        return company_id
+
+    @api.model
+    def _get_number(self):
+        sequence = self.env['ir.sequence']
+        printer_point = self.env['res.users'].browse(self._uid).printer_point
+        return sequence.next_by_code('withhold' + printer_point)
+
+    number = fields.Char(string="Numero", size=17, required=True, states={'authorized': [('readonly', True)]}, default=_get_number)
+    emission_date = fields.Date(string="Fecha Emisión", required=True, default=datetime.now, states={'authorized': [('readonly', True)]})
+    access_key = fields.Char(string="Clave de Acceso", size=49, states={'authorized': [('readonly', True)]})
+    electronic_authorization = fields.Char(string="Autorización Electrónica", size=49, states={'authorized': [('readonly', True)]})
+    authorization_date = fields.Datetime(string="Fecha y Hora de Autorización", states={'authorized': [('readonly', True)]})
+    line_id = fields.One2many("account.withhold.electronic.line", "withhold_id", required=True, string="Lineas", states={'authorized': [('readonly', True)]})
+    partner_id = fields.Many2one("res.partner", string="Cliente", required=True, states={'authorized': [('readonly', True)]})
+    vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat', states={'authorized': [('readonly', True)]})
+    email = fields.Char(string="Email", states={'authorized': [('readonly', True)]}, related='partner_id.email')
     street = fields.Char(string="Dirección", related='partner_id.street')
-    sri_response = fields.Char(string="Respuesta SRI")
-    xml_report = fields.Binary(string="Archivo XML")
-    xml_name = fields.Char(string="Archivo XML")
+    sri_response = fields.Char(string="Respuesta SRI", states={'authorized': [('readonly', True)]})
+    xml_report = fields.Binary(string="Archivo XML", states={'authorized': [('readonly', True)]})
+    xml_name = fields.Char(string="Archivo XML", states={'authorized': [('readonly', True)]})
     state = fields.Selection([('authorized', 'Autorizado'),
                               ('unathorized', 'No autorizado'),
-                              ('loaded', 'Por Autorizar')], string="Estado", default='loaded')
-    total = fields.Float(string="Total", required=True)
-    note = fields.Text(string="Informacion Adicional")
-    fiscalyear = fields.Char(string="Año Fiscal")
-    company_id = fields.Many2one('res.company', string="Compania", required=True)
-    sent = fields.Boolean(string="Enviado")
+                              ('loaded', 'Por Autorizar'),
+                              ('draft', 'Borrador')], string="Estado", default='draft')
+    total = fields.Float(string="Total a retener", required=True, compute='_get_total_withhold')
+    note = fields.Text(string="Informacion Adicional", states={'authorized': [('readonly', True)]})
+    fiscalyear = fields.Char(string="Año Fiscal", states={'authorized': [('readonly', True)]}, help='MM/YYYY')
+    company_id = fields.Many2one('res.company', string="Compania", required=True, states={'authorized': [('readonly', True)]},
+                                 default=_get_company_id)
+    sent = fields.Boolean(string="Enviado", states={'authorized': [('readonly', True)]})
+    lock = fields.Boolean(string='Bloqueado')
+
+    @api.one
+    @api.depends('line_id.tax', 'line_id.base_amount', 'line_id.tax_amount')
+    def _get_total_withhold(self):
+        total = 0
+        for line in self.line_id:
+            total += line.tax_amount
+        self.total = total
 
     @api.multi
+    def change_state_to(self):
+        for withhold in self:
+            withhold.state = 'loaded'
+            access_key = generate_access_key(self, withhold)
+            withhold.access_key = access_key
+            withhold.electronic_authorization = access_key
+
+    @api.one
     def authorization_document_button(self):
-        response = authorization_document(self)
-        self.write(response)
+        if not self.lock:
+            self.lock = True
+            response = authorization_document(self)
+            self.write(response)
+            if response['state'] != 'authorized':
+                self.lock = False
 
     @api.multi
     def authorization_documents_cron(self, *args):
         withholds = self.search([('state', '=', 'loaded')], order='number asc')
         for withhold in withholds:
-            response = authorization_document(withhold)
-            withhold.write(response)
+            if not withhold.lock:
+                withhold.lock = True
+                response = authorization_document(withhold)
+                withhold.write(response)
+                if response['state'] != 'authorized':
+                    withhold.lock = False
 
     @api.multi
     def send_mail_document(self):
@@ -79,10 +117,15 @@ class AccountWithholdElectronicLine(models.Model):
     base_amount = fields.Float(string="Base Imponible", required=True)
     tax = fields.Integer(string="Porcentaje", required=True)
     code = fields.Char(string="Codigo", required=True, size=3)
-    tax_amount = fields.Float(string="Total a Retener", required=True)
+    tax_amount = fields.Float(string="Total", required=True, compute='_get_tax_amount')
     num_fact = fields.Char(sting="Numero Factura", required=True, size=15)
     tax_name = fields.Selection([('1', 'RENTA'),
                                 ('2', 'IVA')], string="Impuesto", required=True)
-    name = fields.Char(stirng="Comprobante", required=True)
+    name = fields.Char(string="Comprobante", required=True)
     emission_date_fact = fields.Char(string="Fecha Emision Factura")
     withhold_id = fields.Many2one('account.withhold.electronic', string="Retencion")
+
+    @api.one
+    @api.depends('tax', 'base_amount')
+    def _get_tax_amount(self):
+        self.tax_amount = self.base_amount * self.tax/100

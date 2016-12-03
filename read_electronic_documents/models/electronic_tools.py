@@ -10,6 +10,7 @@ from core_electronic_authorization.authorization_sri import generate_access_key
 import plantilla_factura
 import plantilla_retencion
 import plantilla_guia
+import base64
 
 
 def check_document(obj, number, model, document_type=''):
@@ -120,7 +121,7 @@ def read_file_invoice(datas, delimiter):
 			value[number]['taxed'] = float(document_data[2])
 			value[number]['total_discount'] = float(document_data[3])
 			value[number]['total'] = float(document_data[4])
-		elif document_data[0] == 'c':
+		elif document_data[0].strip('\r') == 'c':
 			value[number]['tax_comp_bool'] = True
 		elif document_data[0] == 'p':
 			error = check_format(plantilla_factura.p, document_data[1:], i)
@@ -141,6 +142,7 @@ def read_file_invoice(datas, delimiter):
 
 
 def create_invoice_from_file(self, values, document_type):
+	account_tax = self.env['account.tax.electronic']
 	for number in values:
 		if check_document(self, number, 'account.invoice.electronic', document_type=document_type):
 			continue
@@ -160,6 +162,7 @@ def create_invoice_from_file(self, values, document_type):
 				subtotal_iva += float(product['total'])
 			else:
 				subtotal_0 += float(product['total'])
+			product['tax'] = account_tax.search([('code', '=', str(int(product['tax'])))])[0].id
 			line_ids.append((0, 0, product))
 		methods = []
 		values[number]['subtotal_taxed'] = subtotal_iva
@@ -174,6 +177,7 @@ def create_invoice_from_file(self, values, document_type):
 		values[number]['line_id'] = line_ids
 		values[number]['payment_ids'] = methods
 		values[number]['company_id'] = self.env['res.users'].browse(self._uid).company_id.id
+		values[number]['state'] = 'loaded'
 		invoice_id = self.env['account.invoice.electronic'].create(values[number])
 		access_key = generate_access_key(self, invoice_id)
 		invoice_id.write({'access_key': access_key, 'electronic_authorization': access_key})
@@ -243,6 +247,7 @@ def create_withhold_from_file(self, values, document_type):
 			line_ids.append((0, 0, product))
 		values[number]['line_id'] = line_ids
 		values[number]['company_id'] = self.env['res.users'].browse(self._uid).company_id.id
+		values[number]['state'] = 'loaded'
 		withhold_id = self.env['account.withhold.electronic'].create(values[number])
 		access_key = generate_access_key(self, withhold_id)
 		withhold_id.write({'access_key': access_key, 'electronic_authorization': access_key})
@@ -261,6 +266,7 @@ def create_remission_from_file(self, values, document_type):
 			line_ids.append((0, 0, product))
 		values[number]['line_id'] = line_ids
 		values[number]['company_id'] = self.env['res.users'].browse(self._uid).company_id.id
+		values[number]['state'] = 'loaded'
 		remission_id = self.env['remission.guide.electronic'].create(values[number])
 		access_key = generate_access_key(self, remission_id)
 		remission_id.write({'access_key': access_key, 'electronic_authorization': access_key})

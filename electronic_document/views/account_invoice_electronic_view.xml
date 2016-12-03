@@ -7,7 +7,7 @@
 			<field name="model">account.invoice.electronic</field>
 			<field name="type">tree</field>
 			<field name="arch" type="xml">
-				<tree create="false" edit="false" string="Factura"  colors="blue:state =='loaded';red:state== 'unauthorized' ;purple:state =='in_process'">
+				<tree string="Factura" colors="blue:state == 'draft';green:state =='loaded';red:state== 'unauthorized' ;purple:state =='in_process'">
 					<field name="emission_date"/>
 					<field name="number"/>
 					<field name="partner_id"/>
@@ -23,12 +23,12 @@
 			<field name="model">account.invoice.electronic</field>
 			<field name="type">form</field>
 			<field name="arch" type="xml">
-			<form create="false" edit="false" string="Factura" version="7.0">
+			<form string="Factura" version="7.0">
 				<header>
-					<button name="authorization_document_button" attrs="{'invisible': [('state','=','authorized')]}"  string="Autorizar comprobante" class="oe_highlight" type="object"/>
+					<button name="authorization_document_button" states="loaded,unauthorized" string="Autorizar comprobante" class="oe_highlight" type="object"/>
 					<button name="send_mail_document" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />
-					<!--<button name="imprimirReporte" string="Imprimir RIDE" class="oe_highlight" type="object" states="loaded,authorized" context="{'type':'factura'}" />-->
-					<field name="state" widget="statusbar" statusbar_visible="loaded,authorized,unauthorized" nolabel="1" />
+					<button name="change_state_to" string="Por Autorizar" class="oe_highlight" type="object" states="draft" />
+					<field name="state" widget="statusbar" statusbar_visible="draft,loaded,authorized,unauthorized" nolabel="1" />
 				</header>
 				<sheet string="Factura">
 					<h1>
@@ -51,6 +51,7 @@
 										<tree string="Lineas de factura" editable="top">
 											<field name="code"/>
 											<field name="name"/>
+											<field name="tax"/>
 											<field name="quantity"/>
 											<field name="price_unit"/>
 											<field name="discount"/>
@@ -60,6 +61,7 @@
 											<group>
 												<field name="code"/>
 												<field name="name"/>
+												<field name="tax"/>
 												<field name="quantity"/>
 												<field name="price_unit"/>
 												<field name="discount"/>
@@ -67,12 +69,14 @@
 											</group>>
 										</form>
 									</field>
-									 <group class="oe_subtotal_footer oe_right">
+									<group class="oe_subtotal_footer oe_right">
 										<field name="subtotal_taxed" />
 										<field name="subtotal_0" />
 										<field name="subtotal" />
 										<field name="total_discount" />
 										<field name="taxed" />
+										<field name="tax_comp_bool"/>
+										<field name="tax_comp" />
 										<field name="total" />
 									</group>
 								</page>
@@ -157,7 +161,7 @@
 			<field name="type">tree</field>
 			<field name="priority" eval="10"/>
 			<field name="arch" type="xml">
-				<tree create="false" edit="false" string="Nota de crédito"  colors="blue:state =='loaded';red:state =='unauthorized';purple:state=='in_process'">
+				<tree string="Nota de crédito"  colors="blue:state == 'draft';green:state =='loaded';red:state =='unauthorized';purple:state=='in_process'">
 					<field name="emission_date"/>
 					<field name="number"/>
 					<field name="partner_id"/>
@@ -173,12 +177,12 @@
 			<field name="model">account.invoice.electronic</field>
 			<field name="type">form</field>
 			<field name="arch" type="xml">
-				<form create="false" edit="false" string="Nota crédito" version="7.0">
+				<form string="Nota crédito" version="7.0">
 					<header>
-						<button name="authorization_document_button" attrs="{'invisible': [('state','=','authorized')]}"  string="Autorizar comprobante" class="oe_highlight" type="object"/>
-						<button name="send_mail_document" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />						<!--<button name="action_invoice_ext_sent" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />
-						<button name="imprimirReporte" string="Imprimir RIDE" class="oe_highlight" type="object" states="loaded,authorized" />
-						--><field name="state" widget="statusbar" statusbar_visible="loaded,authorized,unauthorized" nolabel="1"/>
+						<button name="authorization_document_button" states="loaded,unauthorized" string="Autorizar comprobante" class="oe_highlight" type="object"/>
+						<button name="send_mail_document" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />
+						<button name="change_state_to" string="Por Autorizar" class="oe_highlight" type="object" states="draft" />
+						<field name="state" widget="statusbar" statusbar_visible="draft,loaded,authorized,unauthorized" nolabel="1"/>
 					</header>
 					<sheet string="Nota crédito">
 						<h1>
@@ -206,6 +210,7 @@
 											<tree string="Lineas de nota credito" editable="top">
 												<field name="code"/>
 												<field name="name"/>
+												<field name="tax"/>
 												<field name="quantity"/>
 												<field name="price_unit"/>
 												<field name="discount"/>
@@ -214,6 +219,7 @@
 											<form string="Lineas de nota credito" >
 												<field name="code"/>
 												<field name="name"/>
+												<field name="tax"/>
 												<field name="quantity"/>
 												<field name="price_unit"/>
 												<field name="discount"/>
@@ -226,6 +232,8 @@
 											<field name="subtotal" />
 											<field name="total_discount" />
 											<field name="taxed" />
+											<field name="tax_comp_bool"/>
+											<field name="tax_comp"/>
 											<field name="total" />
 										</group>
 									</page>
@@ -308,7 +316,7 @@
 			<field name="model">account.invoice.electronic</field>
 			<field name="type">tree</field>
 			<field name="arch" type="xml">
-				<tree create="false" edit="false" string="Nota de débito"  colors="blue:state == 'loaded';red:state == 'unauthorized';purple:state=='in_process'">
+				<tree string="Nota de débito"  colors="blue:state == 'draft';green:state == 'loaded';red:state == 'unauthorized';purple:state=='in_process'">
 					<field name="emission_date"/>
 					<field name="number"/>
 					<field name="partner_id"/>
@@ -324,12 +332,12 @@
 			<field name="model">account.invoice.electronic</field>
 			<field name="type">form</field>
 			<field name="arch" type="xml">
-			<form create="false" edit="false" string="Nota de débito" version="7.0">
+			<form string="Nota de débito" version="7.0">
 				<header>
-					<button name="authorization_document_button" attrs="{'invisible': [('state','=','authorized')]}"  string="Autorizar comprobante" class="oe_highlight" type="object"/>
+					<button name="authorization_document_button" states="loaded,unauthorized"  string="Autorizar comprobante" class="oe_highlight" type="object"/>
 					<button name="send_mail_document" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />
-					<!--<button name="imprimirReporte" string="Imprimir RIDE" class="oe_highlight" type="object" states="loaded,authorized"/>
-					--><field name="state" widget="statusbar" statusbar_visible="loaded,authorized,unauthorized" nolabel="1" />
+					<button name="change_state_to" string="Por Autorizar" class="oe_highlight" type="object" states="draft" />
+					<field name="state" widget="statusbar" statusbar_visible="draft,loaded,authorized,unauthorized" nolabel="1" />
 				</header>
 				<sheet string="Nota de débito">
 					<h1>
@@ -350,7 +358,7 @@
 							<field nolabel="1" name="motive"/>
 						</group>
 						<group string="Valor de la  modificación" colspan="2">
-							<field nolabel="1" name="motive"/>
+							<field nolabel="1" name="modification_value"/>
 						</group>
 					</group>
 					<newline />
@@ -408,8 +416,8 @@
 			<field name="name">Notas de débito</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">account.invoice.electronic</field>
-			<field name="domain">[('type','=','debit')]</field>
-			<field name="context">{'type':'debit'}</field>
+			<field name="domain">[('type','=','debito')]</field>
+			<field name="context">{'type':'debito'}</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 			<field name="view_id" ref="account_debit_electronic_form_view"/>

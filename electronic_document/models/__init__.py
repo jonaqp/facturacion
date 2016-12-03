@@ -4,4 +4,7 @@ import remission_guide_electronic
 import payment_method
 import res_company
 import send_mail_document
+import account_tax_electronic
+import res_users
+
 

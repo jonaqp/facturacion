@@ -10,6 +10,8 @@
              'views/payment_method_view.xml',
              'views/res_company_view.xml',
              'views/send_mail_document_view.xml',
+             'views/res_users_view.xml',
+             'views/account_tax_electronic_view.xml',
              'data/data_payment_method.xml',
              'data/cron_jobs.xml',
              'data/email_template_data.xml'],
