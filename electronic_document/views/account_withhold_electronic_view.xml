@@ -52,6 +52,7 @@
                                                 <field name="name"/>
                                                 <field name="code"/>
                                                 <field name="num_fact"/>
+                                                <field name="emission_date_fact" placeholder="dd/mm/yyyy"/>
                                                 <field name="base_amount"/>
                                                 <field name="tax_name"/>
                                                 <field name="tax"/>
@@ -61,6 +62,7 @@
                                                 <field name="name"/>
                                                 <field name="code"/>
                                                 <field name="num_fact"/>
+                                                <field name="emission_date_fact" placeholder="dd/mm/yyyy"/>
                                                 <field name="base_amount"/>
                                                 <field name="tax_name"/>
                                                 <field name="tax"/>

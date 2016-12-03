@@ -299,7 +299,8 @@ def generate_xml_withhold(withhold_id, environment):
         SubElement(impuesto, "valorRetenido").text = str(line.tax_amount)
         SubElement(impuesto, "codDocSustento").text = '01'
         SubElement(impuesto, "numDocSustento").text = line.num_fact.replace("-", "")
-        SubElement(impuesto, "fechaEmisionDocSustento").text = format_date(line.emission_date_fact)
+        if line.emission_date_fact:
+            SubElement(impuesto, "fechaEmisionDocSustento").text = format_date(line.emission_date_fact)
     indent(root, context={'retention': True})
     return root, type_document
 

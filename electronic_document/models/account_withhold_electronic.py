@@ -20,29 +20,29 @@ class AccountWithholdElectronic(models.Model):
         printer_point = self.env['res.users'].browse(self._uid).printer_point
         return sequence.next_by_code('withhold' + printer_point)
 
-    number = fields.Char(string="Numero", size=17, required=True, states={'authorized': [('readonly', True)]}, default=_get_number)
-    emission_date = fields.Date(string="Fecha Emisión", required=True, default=datetime.now, states={'authorized': [('readonly', True)]})
-    access_key = fields.Char(string="Clave de Acceso", size=49, states={'authorized': [('readonly', True)]})
-    electronic_authorization = fields.Char(string="Autorización Electrónica", size=49, states={'authorized': [('readonly', True)]})
-    authorization_date = fields.Datetime(string="Fecha y Hora de Autorización", states={'authorized': [('readonly', True)]})
-    line_id = fields.One2many("account.withhold.electronic.line", "withhold_id", required=True, string="Lineas", states={'authorized': [('readonly', True)]})
-    partner_id = fields.Many2one("res.partner", string="Cliente", required=True, states={'authorized': [('readonly', True)]})
-    vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat', states={'authorized': [('readonly', True)]})
-    email = fields.Char(string="Email", states={'authorized': [('readonly', True)]}, related='partner_id.email')
+    number = fields.Char(string="Numero", size=17, required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, default=_get_number)
+    emission_date = fields.Date(string="Fecha Emisión", required=True, default=datetime.now, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    access_key = fields.Char(string="Clave de Acceso", size=49, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    electronic_authorization = fields.Char(string="Autorización Electrónica", size=49, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    authorization_date = fields.Datetime(string="Fecha y Hora de Autorización", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    line_id = fields.One2many("account.withhold.electronic.line", "withhold_id", required=True, string="Lineas", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    partner_id = fields.Many2one("res.partner", string="Cliente", required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat', states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    email = fields.Char(string="Email", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, related='partner_id.email')
     street = fields.Char(string="Dirección", related='partner_id.street')
-    sri_response = fields.Char(string="Respuesta SRI", states={'authorized': [('readonly', True)]})
-    xml_report = fields.Binary(string="Archivo XML", states={'authorized': [('readonly', True)]})
-    xml_name = fields.Char(string="Archivo XML", states={'authorized': [('readonly', True)]})
+    sri_response = fields.Char(string="Respuesta SRI", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    xml_report = fields.Binary(string="Archivo XML", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    xml_name = fields.Char(string="Archivo XML", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     state = fields.Selection([('authorized', 'Autorizado'),
-                              ('unathorized', 'No autorizado'),
+                              ('unauthorized', 'No autorizado'),
                               ('loaded', 'Por Autorizar'),
                               ('draft', 'Borrador')], string="Estado", default='draft')
     total = fields.Float(string="Total a retener", required=True, compute='_get_total_withhold')
-    note = fields.Text(string="Informacion Adicional", states={'authorized': [('readonly', True)]})
-    fiscalyear = fields.Char(string="Año Fiscal", states={'authorized': [('readonly', True)]}, help='MM/YYYY')
-    company_id = fields.Many2one('res.company', string="Compania", required=True, states={'authorized': [('readonly', True)]},
+    note = fields.Text(string="Informacion Adicional", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    fiscalyear = fields.Char(string="Año Fiscal", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, help='MM/YYYY')
+    company_id = fields.Many2one('res.company', string="Compania", required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]},
                                  default=_get_company_id)
-    sent = fields.Boolean(string="Enviado", states={'authorized': [('readonly', True)]})
+    sent = fields.Boolean(string="Enviado", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     lock = fields.Boolean(string='Bloqueado')
 
     @api.one

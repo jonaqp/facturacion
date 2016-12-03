@@ -23,21 +23,21 @@ class AccountInvoiceElectronic(models.Model):
         return sequence.next_by_code(context.get('type') + printer_point)
 
     number = fields.Char(string="Numero", size=17, required=True, default=_get_number, readonly=True)
-    emission_date = fields.Date(string="Fecha Emisión", required=True, default=datetime.now,  states={'authorized': [('readonly', True)]})
+    emission_date = fields.Date(string="Fecha Emisión", required=True, default=datetime.now,  states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     type = fields.Selection([('factura', 'Factura'),
                              ('credito', 'Nota de Crédito'),
                              ('debito', 'Nota de Débito')], string='Tipo')
-    access_key = fields.Char(string="Clave de Acceso", size=49, states={'authorized': [('readonly', True)]})
-    electronic_authorization = fields.Char(string="Autorización Electrónica", size=49, states={'authorized': [('readonly', True)]})
-    authorization_date = fields.Datetime(string="Fecha y Hora de Autorización", states={'authorized': [('readonly', True)]})
-    line_id = fields.One2many("account.invoice.electronic.line", "invoice_id", required=True, string="Lineas",states={'authorized': [('readonly', True)]})
-    partner_id = fields.Many2one("res.partner", string="Cliente", required=True, states={'authorized': [('readonly', True)]})
-    vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat')
-    email = fields.Char(string="Email", states={'authorized': [('readonly', True)]}, related='partner_id.email')
-    street = fields.Char(string="Dirección", related='partner_id.street')
-    sri_response = fields.Char(string="Respuesta SRI", states={'authorized': [('readonly', True)]})
-    xml_report = fields.Binary(string="Archivo XML", states={'authorized': [('readonly', True)]})
-    xml_name = fields.Char(string="Archivo XML", states={'authorized': [('readonly', True)]})
+    access_key = fields.Char(string="Clave de Acceso", size=49, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    electronic_authorization = fields.Char(string="Autorización Electrónica", size=49, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    authorization_date = fields.Datetime(string="Fecha y Hora de Autorización", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    line_id = fields.One2many("account.invoice.electronic.line", "invoice_id", required=True, string="Lineas",states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    partner_id = fields.Many2one("res.partner", string="Cliente", required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat', states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    email = fields.Char(string="Email", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, related='partner_id.email')
+    street = fields.Char(string="Dirección", related='partner_id.street', states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    sri_response = fields.Char(string="Respuesta SRI", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    xml_report = fields.Binary(string="Archivo XML", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    xml_name = fields.Char(string="Archivo XML", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     state = fields.Selection([('authorized', 'Autorizado'),
                               ('unauthorized', 'No autorizado'),
                               ('loaded', 'Por Autorizar'),
@@ -48,18 +48,18 @@ class AccountInvoiceElectronic(models.Model):
     total_discount = fields.Float(string="Total Descuento")
     taxed = fields.Float(string="Iva %", required=True, compute='_get_total_invoice')
     total = fields.Float(string="Total", required=True, compute='_get_total_invoice')
-    tax_comp_bool = fields.Boolean(string="Compensacion Iva?")
+    tax_comp_bool = fields.Boolean(string="Compensacion Iva?", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     tax_comp = fields.Float(string="Compensacion Solidaria iva 2%", compute='_get_tax_comp')
-    note = fields.Text(string="Informacion Adicional", states={'authorized': [('readonly', True)]})
-    motive = fields.Char(string="Motivo", states={'authorized': [('readonly', True)]}, required=True)
-    number_fact = fields.Char(string="Factura", size=17, states={'authorized': [('readonly', True)]})
+    note = fields.Text(string="Informacion Adicional", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    motive = fields.Char(string="Motivo", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, required=True)
+    number_fact = fields.Char(string="Factura", size=17, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     number_fact_date = fields.Char(string="Fecha Factura", size=17, states={'authorized': [('readonly', True)]})
     payment_ids = fields.One2many('payment.method.invoice', 'invoice_id', string="Formas de Pago", required=True,
-                                  states={'authorized': [('readonly', True)]})
-    company_id = fields.Many2one('res.company', string="Compania", required=True, states={'authorized': [('readonly', True)]},
+                                  states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    company_id = fields.Many2one('res.company', string="Compania", required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]},
                                  default=_get_company_id)
-    sent = fields.Boolean(string="Enviado", states={'authorized': [('readonly', True)]})
-    remission_guide = fields.Char(string="Guia de Remision", size=17, states={'authorized': [('readonly', True)]})
+    sent = fields.Boolean(string="Enviado", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    remission_guide = fields.Char(string="Guia de Remision", size=17, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     modification_value = fields.Float(string="Valor de Modificacion", required=True)
     lock = fields.Boolean(string='Bloqueado')
 

@@ -22,36 +22,36 @@ class RemissionGuideElectronic(models.Model):
         printer_point = self.env['res.users'].browse(self._uid).printer_point
         return sequence.next_by_code('remission' + printer_point)
 
-    number = fields.Char(string="Numero", size=17, required=True, default=_get_number)
+    number = fields.Char(string="Numero", size=17, required=True, default=_get_number, readonly=True)
     emission_date = fields.Date(string="Fecha Inicio Transporte", required=True, default=datetime.now,
-                                      states={'authorized': [('readonly', True)]})
+                                      states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     emission_date_stop = fields.Date(string="Fecha Fin Transporte", required=True, default=datetime.now,
-                                     states={'authorized': [('readonly', True)]})
-    access_key = fields.Char(string="Clave de Acceso", size=49, states={'authorized': [('readonly', True)]})
-    electronic_authorization = fields.Char(string="Autorización Electrónica", size=49, states={'authorized': [('readonly', True)]})
-    authorization_date = fields.Datetime(string="Fecha y Hora de Autorización",states={'authorized': [('readonly', True)]})
+                                     states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    access_key = fields.Char(string="Clave de Acceso", size=49, states={'authorized': [('readonly', True)],  'loaded': [('readonly', True)]})
+    electronic_authorization = fields.Char(string="Autorización Electrónica", size=49, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    authorization_date = fields.Datetime(string="Fecha y Hora de Autorización",states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     line_id = fields.One2many("remission.guide.electronic.line", "remission_id", required=True, string="Lineas",
-                              states={'authorized': [('readonly', True)]})
-    partner_id = fields.Many2one("res.partner", string="Cliente", required=True, states={'authorized': [('readonly', True)]})
-    vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat', states={'authorized': [('readonly', True)]})
-    email = fields.Char(string="Email", states={'authorized': [('readonly', True)]}, related='partner_id.email')
+                              states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    partner_id = fields.Many2one("res.partner", string="Cliente", required=True, states={'authorized': [('readonly', True)],  'loaded': [('readonly', True)]})
+    vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat', states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    email = fields.Char(string="Email", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, related='partner_id.email')
     street = fields.Char(string="Dirección LLegada", related='partner_id.street')
-    sri_response = fields.Char(string="Respuesta SRI", states={'authorized': [('readonly', True)]})
-    xml_report = fields.Binary(string="Archivo XML", states={'authorized': [('readonly', True)]})
-    xml_name = fields.Char(string="Archivo XML", states={'authorized': [('readonly', True)]})
+    sri_response = fields.Char(string="Respuesta SRI", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    xml_report = fields.Binary(string="Archivo XML", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    xml_name = fields.Char(string="Archivo XML", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     state = fields.Selection([('authorized', 'Autorizado'),
                               ('unathorized', 'No autorizado'),
                               ('loaded', 'Por Autorizar'),
                               ('draft', 'Borrador')], string="Estado", default='draft')
-    note = fields.Text(string="Informacion Adicional", states={'authorized': [('readonly', True)]})
-    motivo = fields.Text(string="Motivo", states={'authorized': [('readonly', True)]})
-    invoice = fields.Char(string="Factura", size=17, states={'authorized': [('readonly', True)]})
-    invoice_emission_date = fields.Date(string="Fecha Emision Factura", states={'authorized': [('readonly', True)]})
-    ruc_carrier = fields.Char(string="RUC Transportista", required=True, states={'authorized': [('readonly', True)]})
-    social_name = fields.Char(string="Razon Social Transportista", required=True, states={'authorized': [('readonly', True)]})
-    start_street = fields.Char(string="Direccion Partida", required=True, states={'authorized': [('readonly', True)]})
-    company_id = fields.Many2one('res.company', string="Compania", required=True, states={'authorized': [('readonly', True)]}, default=_get_company_id)
-    sent = fields.Boolean(string="Enviado", states={'authorized': [('readonly', True)]})
+    note = fields.Text(string="Informacion Adicional", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    motivo = fields.Text(string="Motivo", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    invoice = fields.Char(string="Factura", size=17, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    invoice_emission_date = fields.Date(string="Fecha Emision Factura", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    ruc_carrier = fields.Char(string="RUC Transportista", required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    social_name = fields.Char(string="Razon Social Transportista", required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    start_street = fields.Char(string="Direccion Partida", required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    company_id = fields.Many2one('res.company', string="Compania", required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, default=_get_company_id)
+    sent = fields.Boolean(string="Enviado", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     lock = fields.Boolean(string='Bloqueado')
 
     @api.one
