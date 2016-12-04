@@ -26,6 +26,7 @@
                     <header>
                         <button name="authorization_document_button" states="loaded,unauthorized" string="Autorizar comprobante" class="oe_highlight" type="object"/>
                         <button name="send_mail_document" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />
+                        <button name="print_document" type="object" string="Imprimir RIDE"  class="oe_highlight" states="loaded,authorized" />
                         <button name="change_state_to" string="Por Autorizar" class="oe_highlight" type="object" states="draft" />
                         <field name="state" statusbar_visible="draft,loaded,authorized,unauthorized" widget="statusbar" nolabel="1" />
                     </header>

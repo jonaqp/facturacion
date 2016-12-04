@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="account_invoice_electronic_report">
+    <t t-call="report.html_container">
+        <div class="page">
+            <t t-foreach="docs" t-as="o">
+                <div class="col-xs-6 mb92">
+                    <table class="table table-bordered">
+                        <tr>
+                            <td><img t-field="o.company_id.logo"/></td>
+                            <td><img t-if="o.access_key" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('EAN13', o.access_key, 300, 50)" style="width:100%;height:35%;"/></td>
+                            <td><strong t-field="o.number"/></td>
+                            <td><p t-field="o.emission_date"/></td>
+                        </tr>
+                    </table>
+                </div>
+            </t>
+        </div>
+    </t>
+</template>
+</odoo>

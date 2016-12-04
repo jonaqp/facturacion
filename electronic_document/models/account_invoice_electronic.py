@@ -117,7 +117,6 @@ class AccountInvoiceElectronic(models.Model):
             invoice.access_key = access_key
             invoice.electronic_authorization = access_key
 
-
     @api.one
     def authorization_document_button(self):
         if not self.lock:
@@ -140,6 +139,14 @@ class AccountInvoiceElectronic(models.Model):
                     invoice.lock = False
                 else:
                     self.xml_report = update_xml_report(self)
+
+    @api.multi
+    def print_document(self):
+        for invoice in self:
+            att_id = self.env['ir.attachment'].search([('res_model', '=', invoice._name), ('res_id', '=', invoice.id)])
+            if att_id:
+                att_id.unlink()
+            return self.env['report'].get_action([invoice.id], 'electronic_document.account_invoice_electronic_report')
 
     @api.multi
     def send_mail_document(self):

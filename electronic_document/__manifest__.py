@@ -5,6 +5,7 @@
     'author': 'BPC INGENIEROS',
     'version' : '1.0',
     'data': ['reports/report.xml',
+             'reports/account_invoice_electronic_report.xml',
              'views/account_invoice_electronic_view.xml',
              'views/account_withhold_electronic_view.xml',
              'views/remission_guide_electronic.xml',

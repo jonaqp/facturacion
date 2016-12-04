@@ -102,6 +102,14 @@ class RemissionGuideElectronic(models.Model):
                     self.xml_report = update_xml_report(self)
 
     @api.multi
+    def print_document(self):
+        for remission in self:
+            att_id = self.env['ir.attachment'].search([('res_model', '=', remission._name), ('res_id', '=', remission.id)])
+            if att_id:
+                att_id.unlink()
+            return self.env['report'].get_action([remission.id], 'electronic_document.account_invoice_electronic_report')
+
+    @api.multi
     def send_mail_document(self):
         context = {}
         ir_model_data = self.env['ir.model.data']

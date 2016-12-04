@@ -6,8 +6,8 @@
             model="account.invoice.electronic"
             string="Invoices"
             report_type="qweb-pdf"
-            name="electronic_document.account_invoice_electronic"
-            file="electronic_document.account_invoice_electronic"
+            name="electronic_document.account_invoice_electronic_report"
+            file="electronic_document.account_invoice_electronic_report"
             attachment_use="True"
             attachment="('Factura Electronica'+'.pdf')"
         />

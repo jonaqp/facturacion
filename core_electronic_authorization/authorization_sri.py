@@ -164,6 +164,8 @@ def authorization_document(document_id):
     else:
         document_xml, type_document = generate_xml_remission(document_id, environment)
     document_signed = do_digital_signature(document_id, document_xml, type_document)
+    if not document_signed:
+        raise UserError('No se encuentra el servicio que firma el document, favor contactar con su administrador.')
     signed_document_xml = base64.b64encode(document_signed)
     document_id.write({'xml_report': signed_document_xml, 'xml_name': document_id.access_key + '.xml'})
     webservice_obj = document_id.env['webservice.sri']
