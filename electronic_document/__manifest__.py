@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name' : 'Electronic Authorization',
+    'author': 'BPC INGENIEROS',
     'version' : '1.0',
     'data': ['reports/report.xml',
              'views/account_invoice_electronic_view.xml',

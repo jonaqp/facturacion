@@ -27,8 +27,8 @@ class AccountWithholdElectronic(models.Model):
     authorization_date = fields.Datetime(string="Fecha y Hora de Autorización", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     line_id = fields.One2many("account.withhold.electronic.line", "withhold_id", required=True, string="Lineas", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     partner_id = fields.Many2one("res.partner", string="Cliente", required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
-    vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat', states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
-    email = fields.Char(string="Email", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, related='partner_id.email')
+    vat = fields.Char(string="RUC/CEDULA", readonly=True, related='partner_id.vat', states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    email = fields.Char(string="Email", readonly=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, related='partner_id.email')
     street = fields.Char(string="Dirección", related='partner_id.street')
     sri_response = fields.Char(string="Respuesta SRI", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     xml_report = fields.Binary(string="Archivo XML", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
@@ -39,7 +39,7 @@ class AccountWithholdElectronic(models.Model):
                               ('draft', 'Borrador')], string="Estado", default='draft')
     total = fields.Float(string="Total a retener", required=True, compute='_get_total_withhold')
     note = fields.Text(string="Informacion Adicional", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
-    fiscalyear = fields.Char(string="Año Fiscal", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, help='MM/YYYY')
+    fiscalyear = fields.Char(string="Año Fiscal", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, help='MM/YYYY', required=True)
     company_id = fields.Many2one('res.company', string="Compania", required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]},
                                  default=_get_company_id)
     sent = fields.Boolean(string="Enviado", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
@@ -52,6 +52,11 @@ class AccountWithholdElectronic(models.Model):
         for line in self.line_id:
             total += line.tax_amount
         self.total = total
+
+    @api.one
+    def change_access_key(self):
+        self.access_key = generate_access_key(self, self)
+        self.electronic_authorization = self.access_key
 
     @api.multi
     def change_state_to(self):

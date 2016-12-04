@@ -52,7 +52,7 @@ def generate_access_key(obj, document_id):
     return clave_acceso
 
 
-def indent(elem, level=0, context=None):
+def indent(elem, level=0, context=None, debito=False):
     if not context: context = {}
     i = "\n" + level * "  "
     if len(elem):
@@ -60,7 +60,7 @@ def indent(elem, level=0, context=None):
             elem.text = i + "  "
             if level == 0 and not context.get('out_sri'):
                 elem.attrib["id"] = "comprobante"
-                if context.get('retention'):
+                if context.get('retention') or debito:
                     elem.attrib["version"] = "1.0.0"
                 else:
                     elem.attrib["version"] = "1.1.0"
@@ -104,8 +104,7 @@ def do_digital_signature(obj, document_xml, type_document):
         raise UserError("No tiene una firma digital configurada")
     path, key = digital_signature.path_digital_signature, digital_signature.password_signature
     path_in_xml = open("in_xml.xml", "w")
-    document_xml = '<?xml version="1.0" encoding="UTF-8" ?>' + tostring(document_xml)
-    document_xml = document_xml
+    document_xml = '<?xml version="1.0" encoding="UTF-8" ?>' + tostring(document_xml, encoding='utf-8')
     path_in_xml.write(document_xml)
     path_in_xml.close()
     current_directory = os.getcwd()
@@ -137,7 +136,7 @@ def authorization_document(document_id):
     signed_document_xml = base64.b64encode(document_signed)
     document_id.write({'xml_report': signed_document_xml, 'xml_name': document_id.access_key + '.xml'})
     webservice_obj = document_id.env['webservice.sri']
-    response = webservice_obj.send_xml_document_reception(document_signed)
+    response = webservice_obj.send_xml_document_reception(signed_document_xml)
     if response['state'] == 'pass':
         response = webservice_obj.send_xml_document_authorization(document_id.access_key)
     return response
@@ -176,21 +175,25 @@ def generate_xml_invoice(invoice, environment):
         factura = SubElement(root, "infoNotaDebito")
     SubElement(factura, "fechaEmision").text = format_date(invoice.emission_date)
     SubElement(factura, "dirEstablecimiento").text = invoice.company_id.street
-    if type_document != "debito":
+    if type_document == "factura":
         if invoice.company_id.contributed:
             SubElement(factura, "contribuyenteEspecial").text = str(invoice.company_id.contributed)
         SubElement(factura, "obligadoContabilidad").text = "NO" if not invoice.company_id.must_account else "SI"
-    else:
+    elif type_document == 'debito':
         SubElement(factura, "obligadoContabilidad").text = "NO" if not invoice.company_id.must_account else "SI"
         if invoice.company_id.contributed:
             SubElement(factura, "contribuyenteEspecial").text = str(invoice.company_id.contributed)
-    SubElement(factura, "tipoIdentificacionComprador").text = get_vat_type(invoice.partner_id.vat)
+    SubElement(factura, "tipoIdentificacionComprador").text = get_vat_type(invoice.partner_id.vat[2:])
     if invoice.type == 'factura' and invoice.remission_guide:
         SubElement(factura, "guiaRemision").text = invoice.remission_guide
     SubElement(factura, "razonSocialComprador").text = invoice.partner_id.name
     SubElement(factura, "identificacionComprador").text = invoice.partner_id.vat[2:]
-    SubElement(factura, "direccionComprador").text = invoice.street
-    if type_document == "notaCredito":
+    if type_document == 'credito':
+        if invoice.company_id.contributed:
+            SubElement(factura, "contribuyenteEspecial").text = str(invoice.company_id.contributed)
+        SubElement(factura, "obligadoContabilidad").text = "NO" if not invoice.company_id.must_account else "SI"
+    # SubElement(factura, "direccionComprador").text = invoice.street
+    if type_document in ("notaCredito", "notaDebito"):
         SubElement(factura, "codDocModificado").text = "01"
         SubElement(factura, "numDocModificado").text = invoice.number_fact
         SubElement(factura, "fechaEmisionDocSustento").text = invoice.number_fact_date
@@ -205,9 +208,9 @@ def generate_xml_invoice(invoice, environment):
         for taxe in line_id:
             ttimpuesto = SubElement(ttconimpuestos, "totalImpuesto")
             SubElement(ttimpuesto, "codigo").text = '2'
-            SubElement(ttimpuesto, "codigoPorcentaje").text = str(taxe.tax)
-            SubElement(ttimpuesto, "baseImponible").text = str(round(taxe.price_unit * taxe.quantity, 2))
-            SubElement(ttimpuesto, "valor").text = str(taxe.total)
+            SubElement(ttimpuesto, "codigoPorcentaje").text = str(taxe.tax.code)
+            SubElement(ttimpuesto, "baseImponible").text = str(taxe.total)
+            SubElement(ttimpuesto, "valor").text = str(round(taxe.total * taxe.tax.percentage/100, 2))
     if type_document == "factura":
         SubElement(factura, "propina").text = "0.0"
         SubElement(factura, "importeTotal").text = str(invoice.total)
@@ -225,29 +228,30 @@ def generate_xml_invoice(invoice, environment):
                     SubElement(pago, "unidadTiempo").text = waypay.unit
     if type_document == "notaCredito":
         SubElement(factura, "motivo").text = "DEVOLUCION"
-    detalles = SubElement(root, "detalles")
-    if line_id:
-        for line in line_id:
-            dttline = SubElement(detalles, "detalle")
-            cPrincipal = line.code
-            if len(line.name) > 25:
-                cPrincipal = line.code[:25]
-            if type_document == "factura":
-                SubElement(dttline, "codigoPrincipal").text = cPrincipal.encode('ascii', 'ignore')
-            if type_document == "notaCredito":
-                SubElement(dttline, "codigoInterno").text = cPrincipal.encode('ascii', 'ignore')
-            SubElement(dttline, "descripcion").text = line.name.encode('ascii', 'ignore')
-            SubElement(dttline, "cantidad").text = str(line.quantity)
-            SubElement(dttline, "precioUnitario").text = str(line.price_unit)
-            SubElement(dttline, "descuento").text = str(line.discount)
-            SubElement(dttline, "precioTotalSinImpuesto").text = str(round(line.price_unit * line.quantity, 2))
-            detalle_impuestos = SubElement(dttline, "impuestos")
-            dtle_impuesto = SubElement(detalle_impuestos, "impuesto")
-            SubElement(dtle_impuesto, "codigo").text = '2'
-            SubElement(dtle_impuesto, "codigoPorcentaje").text = str(line.tax)
-            SubElement(dtle_impuesto, "tarifa").text = get_percentage(line.tax)
-            SubElement(dtle_impuesto, "baseImponible").text = str(round(line.price_unit * line.quantity, 2))
-            SubElement(dtle_impuesto, "valor").text = str(line.total)
+    if type_document != 'notaDebito':
+        detalles = SubElement(root, "detalles")
+        if line_id:
+            for line in line_id:
+                dttline = SubElement(detalles, "detalle")
+                cPrincipal = line.code
+                if len(line.name) > 25:
+                    cPrincipal = line.code[:25]
+                if type_document == "factura":
+                    SubElement(dttline, "codigoPrincipal").text = cPrincipal.encode('ascii', 'ignore')
+                if type_document == "notaCredito":
+                    SubElement(dttline, "codigoInterno").text = cPrincipal.encode('ascii', 'ignore')
+                SubElement(dttline, "descripcion").text = line.name.encode('ascii', 'ignore')
+                SubElement(dttline, "cantidad").text = str(line.quantity)
+                SubElement(dttline, "precioUnitario").text = str(line.price_unit)
+                SubElement(dttline, "descuento").text = str(line.discount)
+                SubElement(dttline, "precioTotalSinImpuesto").text = str(round(line.price_unit * line.quantity, 2))
+                detalle_impuestos = SubElement(dttline, "impuestos")
+                dtle_impuesto = SubElement(detalle_impuestos, "impuesto")
+                SubElement(dtle_impuesto, "codigo").text = '2'
+                SubElement(dtle_impuesto, "codigoPorcentaje").text = str(line.tax.code)
+                SubElement(dtle_impuesto, "tarifa").text = get_percentage(int(line.tax.code))
+                SubElement(dtle_impuesto, "baseImponible").text = str(round(line.price_unit * line.quantity, 2))
+                SubElement(dtle_impuesto, "valor").text = str(line.total)
     if type_document == "notaDebito":
         detalle_impuestos = SubElement(factura, "impuestos")
         dtle_impuesto = SubElement(detalle_impuestos, "impuesto")
@@ -261,7 +265,7 @@ def generate_xml_invoice(invoice, environment):
         dtle_motivo = SubElement(detalle_movitos, "motivo")
         SubElement(dtle_motivo, "razon").text = invoice.motive.encode('ascii', 'ignore')
         SubElement(dtle_motivo, "valor").text = str(round(invoice.modification_value, 2))
-    indent(root)
+    indent(root, debito=True)
     return root, type_document
 
 
@@ -275,7 +279,7 @@ def generate_xml_withhold(withhold_id, environment):
     SubElement(tributaria, "tipoEmision").text = '1'
     SubElement(tributaria, "razonSocial").text = withhold_id.company_id.name
     SubElement(tributaria, "nombreComercial").text = withhold_id.company_id.name
-    SubElement(tributaria, "ruc").text = withhold_id.company_id.vat
+    SubElement(tributaria, "ruc").text = withhold_id.company_id.vat[2:]
     SubElement(tributaria, "claveAcceso").text = access_key
     SubElement(tributaria, "codDoc").text = '07'
     SubElement(tributaria, "estab").text = est
@@ -306,7 +310,49 @@ def generate_xml_withhold(withhold_id, environment):
 
 
 def generate_xml_remission(remission, environment):
-    pass
+    type_document = 'guiaRemision'
+    est, pto, sec = remission.number.split("-")
+    anuario, mes, dia = remission.emission_date.split("-")
+    clave_acceso = remission.access_key
+    root = Element(type_document)
+    tributaria = SubElement(root, "infoTributaria")
+    SubElement(tributaria, "ambiente").text = environment
+    SubElement(tributaria, "tipoEmision").text = '1'
+    SubElement(tributaria, "razonSocial").text = remission.company_id.name
+    SubElement(tributaria, "ruc").text = remission.company_id.vat[2:]
+    SubElement(tributaria, "claveAcceso").text = clave_acceso
+    SubElement(tributaria, "codDoc").text = '06'
+    SubElement(tributaria, "estab").text = est
+    SubElement(tributaria, "ptoEmi").text = pto
+    SubElement(tributaria, "secuencial").text = sec
+    SubElement(tributaria, "dirMatriz").text = remission.company_id.street
+    remissionxml = SubElement(root, "infoGuiaRemision")
+    SubElement(remissionxml, "dirPartida").text = remission.start_street.encode('ascii', 'ignore')
+    SubElement(remissionxml, "razonSocialTransportista").text = remission.social_name.encode('ascii', 'ignore')
+    SubElement(remissionxml, "tipoIdentificacionTransportista").text = get_vat_type(remission.ruc_carrier)
+    SubElement(remissionxml, "rucTransportista").text = remission.ruc_carrier
+    if remission.company_id.must_account:
+        SubElement(remissionxml, "obligadoContabilidad").text = "SI"
+    if remission.company_id.contributed:
+        SubElement(remissionxml, "contribuyenteEspecial").text = remission.company_id.contributed
+    SubElement(remissionxml, "fechaIniTransporte").text = dia + "/" + mes + "/" + anuario
+    anuarioend, mesend, diaend = remission.emission_date_stop.split("-")
+    SubElement(remissionxml, "fechaFinTransporte").text = diaend + "/" + mesend + "/" + anuarioend
+    SubElement(remissionxml, "placa").text = remission.license_plate
+    destinatarios = SubElement(root, "destinatarios")
+    destinatario = SubElement(destinatarios, "destinatario")
+    SubElement(destinatario, "identificacionDestinatario").text = remission.partner_id.vat
+    SubElement(destinatario, "razonSocialDestinatario").text = remission.partner_id.name.encode('ascii', 'ignore')
+    SubElement(destinatario, "dirDestinatario").text = remission.partner_id.street.encode('ascii', 'ignore')
+    SubElement(destinatario, "motivoTraslado").text = remission.transfer_motive.encode('ascii', 'ignore')
+    detalles = SubElement(destinatario, "detalles")
+    for line in remission.line_id:
+        detalle = SubElement(detalles, "detalle")
+        SubElement(detalle, "codigoInterno").text = line.code.encode('ascii', 'ignore')
+        SubElement(detalle, "descripcion").text = line.name.encode('ascii', 'ignore')
+        SubElement(detalle, "cantidad").text = str(line.quantity)
+    indent(root)
+    return root, type_document
 
 
 class WebserviceSri(models.Model):
@@ -330,14 +376,26 @@ class WebserviceSri(models.Model):
 
     def _format_response_sri(self, response, reception=False):
         result = {}
-        mensaje = response.comprobantes.comprobante[0].mensajes[0]
+        if hasattr(response, 'estado'):
+            if response.estado.lower() == 'recibida':
+                result['state'] = 'pass'
+                return result
+        if reception:
+            mensaje = response.comprobantes.comprobante[0].mensajes[0]
+        else:
+            mensaje = response.autorizaciones.autorizacion[0]
+            if mensaje.estado.lower() == 'autorizado':
+                result['sri_response'] = 'DOCUMENTO AUTORIZADO'
+                result['state'] = 'authorized'
+                result['authorization_date'] = datetime.now()
+                return result
+            mensaje = mensaje.mensajes[0]
         if mensaje[0].tipo == 'ERROR':
-            result['sri_response'] = mensaje[0].mensaje + mensaje[0].informacionAdicional
-            result['state'] = 'unauthorized'
-        elif not reception:
-            result['sri_response'] = 'DOCUMENTO AUTORIZADO'
-            result['state'] = 'authorized'
-            result['authorized_date'] = datetime.now()
+            if mensaje[0].mensaje.lower() == 'clave acceso registrada':
+                result['state'] = 'pass'
+            else:
+                result['sri_response'] = mensaje[0].mensaje + mensaje[0].informacionAdicional
+                result['state'] = 'unauthorized'
         else:
             result['state'] = 'pass'
         return result

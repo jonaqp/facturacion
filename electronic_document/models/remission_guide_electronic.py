@@ -33,14 +33,14 @@ class RemissionGuideElectronic(models.Model):
     line_id = fields.One2many("remission.guide.electronic.line", "remission_id", required=True, string="Lineas",
                               states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     partner_id = fields.Many2one("res.partner", string="Cliente", required=True, states={'authorized': [('readonly', True)],  'loaded': [('readonly', True)]})
-    vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat', states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
-    email = fields.Char(string="Email", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, related='partner_id.email')
-    street = fields.Char(string="Dirección LLegada", related='partner_id.street')
+    vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat', states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, readonly=True)
+    email = fields.Char(string="Email", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, related='partner_id.email', readonly=True)
+    street = fields.Char(string="Dirección LLegada", related='partner_id.street', readonly=True)
     sri_response = fields.Char(string="Respuesta SRI", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     xml_report = fields.Binary(string="Archivo XML", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     xml_name = fields.Char(string="Archivo XML", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     state = fields.Selection([('authorized', 'Autorizado'),
-                              ('unathorized', 'No autorizado'),
+                              ('unauthorized', 'No autorizado'),
                               ('loaded', 'Por Autorizar'),
                               ('draft', 'Borrador')], string="Estado", default='draft')
     note = fields.Text(string="Informacion Adicional", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
@@ -53,6 +53,8 @@ class RemissionGuideElectronic(models.Model):
     company_id = fields.Many2one('res.company', string="Compania", required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, default=_get_company_id)
     sent = fields.Boolean(string="Enviado", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     lock = fields.Boolean(string='Bloqueado')
+    transfer_motive = fields.Char(string='Motivo', required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    license_plate = fields.Char(string='Placa', required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
 
     @api.one
     def authorization_document_button(self):
@@ -70,6 +72,11 @@ class RemissionGuideElectronic(models.Model):
             access_key = generate_access_key(self, remisison)
             remisison.access_key = access_key
             remisison.electronic_authorization = access_key
+
+    @api.one
+    def change_access_key(self):
+        self.access_key = generate_access_key(self, self)
+        self.electronic_authorization = self.access_key
 
     @api.multi
     def authorization_documents_cron(self, *args):

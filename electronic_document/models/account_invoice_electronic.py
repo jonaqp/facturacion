@@ -51,7 +51,7 @@ class AccountInvoiceElectronic(models.Model):
     tax_comp_bool = fields.Boolean(string="Compensacion Iva?", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     tax_comp = fields.Float(string="Compensacion Solidaria iva 2%", compute='_get_tax_comp')
     note = fields.Text(string="Informacion Adicional", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
-    motive = fields.Char(string="Motivo", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, required=True)
+    motive = fields.Char(string="Motivo", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     number_fact = fields.Char(string="Factura", size=17, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     number_fact_date = fields.Char(string="Fecha Factura", size=17, states={'authorized': [('readonly', True)]})
     payment_ids = fields.One2many('payment.method.invoice', 'invoice_id', string="Formas de Pago", required=True,
@@ -60,8 +60,13 @@ class AccountInvoiceElectronic(models.Model):
                                  default=_get_company_id)
     sent = fields.Boolean(string="Enviado", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     remission_guide = fields.Char(string="Guia de Remision", size=17, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
-    modification_value = fields.Float(string="Valor de Modificacion", required=True)
+    modification_value = fields.Float(string="Valor de Modificacion")
     lock = fields.Boolean(string='Bloqueado')
+
+    @api.one
+    def change_access_key(self):
+        self.access_key = generate_access_key(self, self)
+        self.electronic_authorization = self.access_key
 
     @api.model
     def create(self, values):
@@ -73,7 +78,7 @@ class AccountInvoiceElectronic(models.Model):
     @api.depends('tax_comp_bool', 'subtotal')
     def _get_tax_comp(self):
         if self.tax_comp_bool:
-            self.tax_comp = self.subtotal_taxed * .02
+            self.tax_comp = round(self.subtotal_taxed * .02, 2)
         else:
             self.tax_comp = 0.0
 
@@ -88,10 +93,10 @@ class AccountInvoiceElectronic(models.Model):
         else:
             for line in self.line_id:
                 if line.tax.code == '0':
-                    self.subtotal_0 += line.total
+                    self.subtotal_0 += round(line.total, 2)
                 else:
-                    self.subtotal_taxed += line.total
-                    tax += line.total * line.tax.percentage / 100
+                    self.subtotal_taxed += round(line.total, 2)
+                    tax += round(line.total * line.tax.percentage / 100, 2)
         self.taxed = tax
         self.subtotal = self.subtotal_taxed + self.subtotal_0
         self.total = self.taxed + self.subtotal - self.tax_comp

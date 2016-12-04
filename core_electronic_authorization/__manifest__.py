@@ -3,6 +3,7 @@
 {
     'name' : 'Core Electronic Authorization',
     'version' : '1.0',
+    'author': 'BPC INGENIEROS',
     'depends': [],
     'data': ['views/parents_view_electronic.xml',
              'views/digital_signature_view.xml',
