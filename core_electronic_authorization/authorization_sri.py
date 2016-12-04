@@ -205,12 +205,18 @@ def generate_xml_invoice(invoice, environment):
     line_id = invoice.line_id
     if line_id:
         ttconimpuestos = SubElement(factura, "totalConImpuestos")
-        for taxe in line_id:
+        if invoice.subtotal_0:
             ttimpuesto = SubElement(ttconimpuestos, "totalImpuesto")
             SubElement(ttimpuesto, "codigo").text = '2'
-            SubElement(ttimpuesto, "codigoPorcentaje").text = str(taxe.tax.code)
-            SubElement(ttimpuesto, "baseImponible").text = str(taxe.total)
-            SubElement(ttimpuesto, "valor").text = str(round(taxe.total * taxe.tax.percentage/100, 2))
+            SubElement(ttimpuesto, "codigoPorcentaje").text = '0'
+            SubElement(ttimpuesto, "baseImponible").text = str(invoice.subtotal_0)
+            SubElement(ttimpuesto, "valor").text = '0'
+        else:
+            ttimpuesto = SubElement(ttconimpuestos, "totalImpuesto")
+            SubElement(ttimpuesto, "codigo").text = '2'
+            SubElement(ttimpuesto, "codigoPorcentaje").text = '3'
+            SubElement(ttimpuesto, "baseImponible").text = str(invoice.subtotal_taxed)
+            SubElement(ttimpuesto, "valor").text = str(invoice.taxed)
     if type_document == "factura":
         SubElement(factura, "propina").text = "0.0"
         SubElement(factura, "importeTotal").text = str(invoice.total)
@@ -250,8 +256,8 @@ def generate_xml_invoice(invoice, environment):
                 SubElement(dtle_impuesto, "codigo").text = '2'
                 SubElement(dtle_impuesto, "codigoPorcentaje").text = str(line.tax.code)
                 SubElement(dtle_impuesto, "tarifa").text = get_percentage(int(line.tax.code))
-                SubElement(dtle_impuesto, "baseImponible").text = str(round(line.price_unit * line.quantity, 2))
-                SubElement(dtle_impuesto, "valor").text = str(line.total)
+                SubElement(dtle_impuesto, "baseImponible").text = str(line.total)
+                SubElement(dtle_impuesto, "valor").text = str(round(line.total * line.tax.percentage/100, 2))
     if type_document == "notaDebito":
         detalle_impuestos = SubElement(factura, "impuestos")
         dtle_impuesto = SubElement(detalle_impuestos, "impuesto")
