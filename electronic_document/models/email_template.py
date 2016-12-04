@@ -23,5 +23,5 @@ class MailTemplate(models.Model):
         if context.get('active_model') in ('account.invoice.electronic', 'account.withhold.electronic', 'remission.guide.electronic'):
             model_id = self.env[context.get('active_model')].browse(context.get('active_id'))
             result, report_name = model_id.xml_report, model_id.xml_name
-            res[res_id[0]]['attachments'].append((report_name, result))
+            res[res_id[0]].setdefault('attachments', []).append((report_name, result))
         return res

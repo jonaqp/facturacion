@@ -124,6 +124,37 @@ def format_date(date):
     return re.sub("([0-9]{4})-([0-9]{2})-([0-9]{2})", r"\3/\2/\1", date)
 
 
+def update_xml_report(object):
+    data = base64.decodestring(object.xml_report)
+    webservice_id = object.env['webservice.sri'].get_webservice_sri()
+    webservice_env = 'PRODUCCION'
+    if webservice_id.environment == '1':
+        webservice_env = 'PRUEBAS'
+    if object._name == 'account.invoice.electronic':
+        if object.type == 'credito':
+            type_document = 'notaCredito'
+        elif object.type == 'debito':
+            type_document = 'notaDebito'
+        else:
+            type_document = object.type
+    elif object._name == 'account.withhold.electronic':
+        type_document = 'comprobanteRetencion'
+    else:
+        type_document = 'guiaRemision'
+
+    string = u"""
+      <autorizacion>
+      <estado>AUTORIZADO</estado>
+      <numeroAutorizacion>%s</numeroAutorizacion>
+      <fechaAutorizacion>%s</fechaAutorizacion>
+      <ambiente>%s</ambiente>
+      <comprobante><?xml version="1.0" encoding="UTF-8"?>"""\
+             % (object.electronic_authorization, object.authorization_date, webservice_env)
+    index = data.find("<%s" % type_document)
+    data = data[:index] + string + data[index:] + '</comprobante></autorizacion>'
+    return base64.b64encode(data)
+
+
 def authorization_document(document_id):
     environment = document_id.env['webservice.sri'].get_webservice_sri().environment
     if document_id._name == 'account.invoice.electronic':
@@ -196,7 +227,7 @@ def generate_xml_invoice(invoice, environment):
     if type_document in ("notaCredito", "notaDebito"):
         SubElement(factura, "codDocModificado").text = "01"
         SubElement(factura, "numDocModificado").text = invoice.number_fact
-        SubElement(factura, "fechaEmisionDocSustento").text = invoice.number_fact_date
+        SubElement(factura, "fechaEmisionDocSustento").text = format_date(invoice.number_fact_date)
     SubElement(factura, "totalSinImpuestos").text = str(invoice.subtotal)
     if type_document == "notaCredito":
         SubElement(factura, "valorModificacion").text = str(invoice.total)
@@ -414,8 +445,7 @@ class WebserviceSri(models.Model):
     def send_xml_document_authorization(self, access_key):
         webservice = self.get_webservice_sri()
         sri_authorization = Client(webservice.url_authorization)
-        return self._format_response_sri(
-            sri_authorization.service.autorizacionComprobante(claveAccesoComprobante=access_key))
+        return self._format_response_sri(sri_authorization.service.autorizacionComprobante(claveAccesoComprobante=access_key))
 
     def update_state(self, message, url='authorization', state='down'):
         vals = {}

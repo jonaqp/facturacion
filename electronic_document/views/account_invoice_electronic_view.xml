@@ -33,11 +33,11 @@
 				<sheet string="Factura">
 					<h1>
 						<p>Factura</p>
-						<field name="number" class="oe_inline"/>
+						<field name="number" class="oe_inline" attrs="{'invisible': [('state', '=', 'draft')], 'required': [('state', '!=', 'draft')]}"/>
 					</h1>
 					<group string="Información" colspan="4">
 						<group colspan="4" col="4">
-							<field name="partner_id"/>
+							<field name="partner_id" domain="[('customer', '=', True)]"/>
 							<field name="vat"/>
 							<field name="emission_date"/>
 							<field name="email"/>
@@ -97,7 +97,7 @@
 									</group>
 								</page>
 								<page string="S.R.I">
-									<button name="change_access_key" string="Generar clave acceso" type="object" class="oe_highlight"/>
+									<button name="change_access_key" string="Generar clave acceso" type="object" class="oe_highlight" attrs="{'invisible': [('state', '=', 'authorized')]}"/>
 									<group  colspan="2" >
 										<field name="type" invisible="1"/>
 										<field name ="electronic_authorization" />
@@ -182,7 +182,7 @@
 					<field name="emission_date"/>
 					<field name="number"/>
 					<field name="partner_id"/>
-					 <field name="access_key" />
+					<field name="access_key"/>
 					<field name="state" />
 					<field name="sent" />
 				</tree>
@@ -203,12 +203,12 @@
 					</header>
 					<sheet string="Nota crédito">
 						<h1>
-							<label string="Nota de crédito"/>
-							<field name="number" class="oe_inline"/>
+							<p>Nota Credito</p>
+							<field name="number" class="oe_inline" attrs="{'invisible': [('state', '=', 'draft')], 'required': [('state', '!=', 'draft')]}" />
 						</h1>
 						<group string="Información" colspan="4">
 							<group colspan="4" col="4">
-								<field name="partner_id"/>
+								<field name="partner_id" domain="[('customer', '=', True)]"/>
 								<field name="vat"/>
 								<field name="email"/>
 								<field name="emission_date"/>
@@ -255,7 +255,7 @@
 										</group>
 									</page>
 									<page string="S.R.I" >
-										<button name="change_access_key" string="Generar clave acceso" type="object" class="oe_highlight"/>
+										<button name="change_access_key" string="Generar clave acceso" type="object" class="oe_highlight" attrs="{'invisible': [('state', '=', 'authorized')]}"/>
 										<group colspan="2" >
 											<field name="type" invisible="1"/>
 											<field name="electronic_authorization" />
@@ -359,11 +359,11 @@
 				</header>
 				<sheet string="Nota de débito">
 					<h1>
-						<label string="Nota de débito"/>
-						<field name="number" class="oe_inline"/>
+						<p>Nota Debito</p>
+						<field name="number" class="oe_inline" attrs="{'invisible': [('state', '=', 'draft')], 'required': [('state', '!=', 'draft')]}"/>
 					</h1>
 					<group colspan="4" col="4">
-						<field name="partner_id"/>
+						<field name="partner_id" domain="[('customer', '=', True)]"/>
 						<field name="vat"/>
 						<field name="email"/>
 						<field name="emission_date"/>
@@ -391,7 +391,7 @@
 					<group colspan="4">
 						<notebook>
 							<page  string="S.R.I" >
-								<button name="change_access_key" string="Generar clave acceso" type="object" class="oe_highlight"/>
+								<button name="change_access_key" string="Generar clave acceso" type="object" class="oe_highlight" attrs="{'invisible': [('state', '=', 'authorized')]}"/>
 								<group colspan="2" >
 									<field name="type" invisible="1"/>
 									<field name ="electronic_authorization" />

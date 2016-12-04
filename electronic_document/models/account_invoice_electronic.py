@@ -2,7 +2,8 @@
 
 from odoo import fields, models, api
 from datetime import datetime
-from core_electronic_authorization.authorization_sri import authorization_document, generate_access_key
+from odoo.exceptions import UserError
+from core_electronic_authorization.authorization_sri import authorization_document, generate_access_key, update_xml_report
 
 
 class AccountInvoiceElectronic(models.Model):
@@ -22,7 +23,7 @@ class AccountInvoiceElectronic(models.Model):
         printer_point = self.env['res.users'].browse(self._uid).printer_point
         return sequence.next_by_code(context.get('type') + printer_point)
 
-    number = fields.Char(string="Numero", size=17, required=True, default=_get_number, readonly=True)
+    number = fields.Char(string="Numero", size=17, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)], 'unauthorized': [('readonly', True)], 'draft': [('required', False)]})
     emission_date = fields.Date(string="Fecha Emisión", required=True, default=datetime.now,  states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     type = fields.Selection([('factura', 'Factura'),
                              ('credito', 'Nota de Crédito'),
@@ -53,20 +54,26 @@ class AccountInvoiceElectronic(models.Model):
     note = fields.Text(string="Informacion Adicional", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     motive = fields.Char(string="Motivo", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     number_fact = fields.Char(string="Factura", size=17, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
-    number_fact_date = fields.Char(string="Fecha Factura", size=17, states={'authorized': [('readonly', True)]})
+    number_fact_date = fields.Date(string="Fecha Factura", size=17, states={'authorized': [('readonly', True)]})
     payment_ids = fields.One2many('payment.method.invoice', 'invoice_id', string="Formas de Pago", required=True,
                                   states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     company_id = fields.Many2one('res.company', string="Compania", required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]},
                                  default=_get_company_id)
     sent = fields.Boolean(string="Enviado", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     remission_guide = fields.Char(string="Guia de Remision", size=17, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
-    modification_value = fields.Float(string="Valor de Modificacion")
+    modification_value = fields.Float(string="Valor de Modificacion", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     lock = fields.Boolean(string='Bloqueado')
 
     @api.one
     def change_access_key(self):
         self.access_key = generate_access_key(self, self)
         self.electronic_authorization = self.access_key
+
+    @api.multi
+    def unlink(self):
+        if self.state in ('authorized', 'loaded'):
+            raise UserError("No es posible eliminar un documento autorizado o por autorizar. Contacte con el administrador de sistema")
+        return super(AccountInvoiceElectronic, self).unlink()
 
     @api.model
     def create(self, values):
@@ -105,9 +112,11 @@ class AccountInvoiceElectronic(models.Model):
     def change_state_to(self):
         for invoice in self:
             invoice.state = 'loaded'
+            invoice.number = self._get_number()
             access_key = generate_access_key(self, invoice)
             invoice.access_key = access_key
             invoice.electronic_authorization = access_key
+
 
     @api.one
     def authorization_document_button(self):
@@ -117,6 +126,7 @@ class AccountInvoiceElectronic(models.Model):
             self.write(response)
             if response['state'] != 'authorized':
                 self.lock = False
+            self.xml_report = update_xml_report(self)
 
     @api.multi
     def authorization_documents_cron(self, *args):
@@ -128,6 +138,8 @@ class AccountInvoiceElectronic(models.Model):
                 invoice.write(response)
                 if response['state'] != 'authorized':
                     invoice.lock = False
+                else:
+                    self.xml_report = update_xml_report(self)
 
     @api.multi
     def send_mail_document(self):

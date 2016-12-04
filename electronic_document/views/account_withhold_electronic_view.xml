@@ -32,11 +32,11 @@
                     <sheet string="Comprobante retención">
                         <h1>
                             <p>Comprobante retención</p>
-                            <field name="number" class="oe_inline"/>
+                            <field name="number" class="oe_inline" attrs="{'invisible': [('state', '=', 'draft')], 'required': [('state', '!=', 'draft')]}"/>
                         </h1>
                         <group string="Información" colspan="4">
                             <group colspan="4" col="4">
-                                <field name="partner_id"/>
+                                <field name="partner_id" domain="[('customer', '=', True)]"/>
                                 <field name="vat"/>
                                 <field name="emission_date"/>
                                 <field name="fiscalyear" placeholder="mm/yyyy"/>
@@ -74,7 +74,7 @@
                                         </group>
                                     </page>
                                     <page string="S.R.I">
-                                        <button name="change_access_key" string="Generar clave acceso" type="object" class="oe_highlight"/>
+                                        <button name="change_access_key" string="Generar clave acceso" type="object" class="oe_highlight" attrs="{'invisible': [('state', '=', 'authorized')]}"/>
                                         <group  colspan="2" >
                                             <field name ="electronic_authorization" />
                                             <field name="access_key" />

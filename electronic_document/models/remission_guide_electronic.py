@@ -2,7 +2,8 @@
 
 from odoo import models, fields, api
 from datetime import datetime
-from core_electronic_authorization.authorization_sri import authorization_document, generate_access_key
+from odoo.exceptions import UserError
+from core_electronic_authorization.authorization_sri import authorization_document, generate_access_key, update_xml_report
 
 
 class RemissionGuideElectronic(models.Model):
@@ -22,7 +23,13 @@ class RemissionGuideElectronic(models.Model):
         printer_point = self.env['res.users'].browse(self._uid).printer_point
         return sequence.next_by_code('remission' + printer_point)
 
-    number = fields.Char(string="Numero", size=17, required=True, default=_get_number, readonly=True)
+    @api.multi
+    def unlink(self):
+        if self.state in ('authorized', 'loaded'):
+            raise UserError("No es posible eliminar un documento autorizado o por autorizar. Contacte con el administrador de sistema")
+        return super(RemissionGuideElectronic, self).unlink()
+
+    number = fields.Char(string="Numero", size=17, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)], 'unauthorized': [('readonly', True)], 'draft': [('required', False)]})
     emission_date = fields.Date(string="Fecha Inicio Transporte", required=True, default=datetime.now,
                                       states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     emission_date_stop = fields.Date(string="Fecha Fin Transporte", required=True, default=datetime.now,
@@ -64,14 +71,17 @@ class RemissionGuideElectronic(models.Model):
             self.write(response)
             if response['state'] != 'authorized':
                 self.lock = False
+            else:
+                self.xml_report = update_xml_report(self)
 
     @api.multi
     def change_state_to(self):
-        for remisison in self:
-            remisison.state = 'loaded'
-            access_key = generate_access_key(self, remisison)
-            remisison.access_key = access_key
-            remisison.electronic_authorization = access_key
+        for remission in self:
+            remission.state = 'loaded'
+            remission.number = self._get_number()
+            access_key = generate_access_key(self, remission)
+            remission.access_key = access_key
+            remission.electronic_authorization = access_key
 
     @api.one
     def change_access_key(self):
@@ -88,14 +98,15 @@ class RemissionGuideElectronic(models.Model):
                 remission.write(response)
                 if response['state'] != 'authorized':
                     remission.lock = False
+                else:
+                    self.xml_report = update_xml_report(self)
 
     @api.multi
     def send_mail_document(self):
         context = {}
         ir_model_data = self.env['ir.model.data']
-        template = 'email_template_remisison_guide_electronic'
         try:
-            template_id = ir_model_data.get_object_reference('electronic_authorization', template)[1]
+            template_id = ir_model_data.get_object_reference('electronic_document', 'email_template_remission_guide_electronic')[1]
         except ValueError:
             template_id = False
         compose_form_id = ir_model_data.get_object_reference('mail', 'email_compose_message_wizard_form')[1]

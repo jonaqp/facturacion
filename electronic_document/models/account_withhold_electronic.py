@@ -2,7 +2,8 @@
 
 from odoo import models, fields, api
 from datetime import datetime
-from core_electronic_authorization.authorization_sri import authorization_document, generate_access_key
+from odoo.exceptions import UserError
+from core_electronic_authorization.authorization_sri import authorization_document, generate_access_key, update_xml_report
 
 
 class AccountWithholdElectronic(models.Model):
@@ -20,7 +21,7 @@ class AccountWithholdElectronic(models.Model):
         printer_point = self.env['res.users'].browse(self._uid).printer_point
         return sequence.next_by_code('withhold' + printer_point)
 
-    number = fields.Char(string="Numero", size=17, required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, default=_get_number)
+    number = fields.Char(string="Numero", size=17,  states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)], 'unauthorized': [('readonly', True)], 'draft': [('required', False)]})
     emission_date = fields.Date(string="Fecha Emisión", required=True, default=datetime.now, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     access_key = fields.Char(string="Clave de Acceso", size=49, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     electronic_authorization = fields.Char(string="Autorización Electrónica", size=49, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
@@ -29,7 +30,7 @@ class AccountWithholdElectronic(models.Model):
     partner_id = fields.Many2one("res.partner", string="Cliente", required=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     vat = fields.Char(string="RUC/CEDULA", readonly=True, related='partner_id.vat', states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     email = fields.Char(string="Email", readonly=True, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, related='partner_id.email')
-    street = fields.Char(string="Dirección", related='partner_id.street')
+    street = fields.Char(string="Dirección", related='partner_id.street', states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     sri_response = fields.Char(string="Respuesta SRI", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     xml_report = fields.Binary(string="Archivo XML", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     xml_name = fields.Char(string="Archivo XML", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
@@ -59,9 +60,16 @@ class AccountWithholdElectronic(models.Model):
         self.electronic_authorization = self.access_key
 
     @api.multi
+    def unlink(self):
+        if self.state in ('authorized', 'loaded'):
+            raise UserError("No es posible eliminar un documento autorizado o por autorizar. Contacte con el administrador de sistema")
+        return super(AccountWithholdElectronic, self).unlink()
+
+    @api.multi
     def change_state_to(self):
         for withhold in self:
             withhold.state = 'loaded'
+            withhold.number = self._get_number()
             access_key = generate_access_key(self, withhold)
             withhold.access_key = access_key
             withhold.electronic_authorization = access_key
@@ -74,6 +82,8 @@ class AccountWithholdElectronic(models.Model):
             self.write(response)
             if response['state'] != 'authorized':
                 self.lock = False
+            else:
+                self.xml_report = update_xml_report(self)
 
     @api.multi
     def authorization_documents_cron(self, *args):
@@ -85,13 +95,15 @@ class AccountWithholdElectronic(models.Model):
                 withhold.write(response)
                 if response['state'] != 'authorized':
                     withhold.lock = False
+                else:
+                    self.xml_report = update_xml_report(self)
 
     @api.multi
     def send_mail_document(self):
         context = {}
         ir_model_data = self.env['ir.model.data']
         try:
-            template_id = ir_model_data.get_object_reference('electronic_authorization', 'email_template_withhold_electronic')[1]
+            template_id = ir_model_data.get_object_reference('electronic_document', 'email_template_withhold_electronic')[1]
         except ValueError:
             template_id = False
         compose_form_id = ir_model_data.get_object_reference('mail', 'email_compose_message_wizard_form')[1]
@@ -127,7 +139,7 @@ class AccountWithholdElectronicLine(models.Model):
     tax_name = fields.Selection([('1', 'RENTA'),
                                 ('2', 'IVA')], string="Impuesto", required=True)
     name = fields.Char(string="Comprobante", required=True)
-    emission_date_fact = fields.Char(string="Fecha Emision Factura")
+    emission_date_fact = fields.Date(string="Fecha Emision Factura")
     withhold_id = fields.Many2one('account.withhold.electronic', string="Retencion")
 
     @api.one

@@ -48,7 +48,7 @@
         <report
             id="remission_guide_electronic"
             model="remission.guide.electronic"
-            string="Invoices"
+            string="Guias"
             report_type="qweb-pdf"
             name="electronic_document.remission_guide_electronic"
             file="electronic_document.remission_guide_electronic"

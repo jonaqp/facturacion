@@ -378,7 +378,7 @@
         </record>
 
       <!-- Guia de Remision-->
-      <record id="email_template_remisison_guide_electronic" model="mail.template">
+      <record id="email_template_remission_guide_electronic" model="mail.template">
             <field name="name">Guias de remision - Enviar por email</field>
             <field name="email_from">${(object.create_uid.email and '%s &lt;%s&gt;' % (object.create_uid.name, object.create_uid.email) or '')|safe}</field>
             <field name="subject">Guias de remision (Ref ${object.number or 'n/a'})</field>
