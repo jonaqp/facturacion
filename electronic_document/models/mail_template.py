@@ -19,9 +19,13 @@ class MailTemplate(models.Model):
                      format expected by :py:meth:`mail_thread.message_post`.
         """
         res = super(MailTemplate, self).generate_email(res_id, fields=fields)
-        context = self._context
-        if context.get('active_model') in ('account.invoice.electronic', 'account.withhold.electronic', 'remission.guide.electronic'):
-            model_id = self.env[context.get('active_model')].browse(context.get('active_id'))
+        if isinstance(res_id, list):
+            res_id = res_id[0]
+        if self.model in ('account.invoice.electronic', 'account.withhold.electronic', 'remission.guide.electronic'):
+            model_id = self.env[self.model].browse(res_id)
             result, report_name = model_id.xml_report, model_id.xml_name
-            res[res_id[0]].setdefault('attachments', []).append((report_name, result))
+            if res_id in res:
+                res[res_id].setdefault('attachments', []).append((report_name, result))
+            else:
+                res.setdefault('attachments', []).append((report_name, result))
         return res

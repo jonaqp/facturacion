@@ -40,8 +40,32 @@
             <field eval="'(False,)'" name="args" />
         </record>
 
-        <record forcecreate="True" id="ir_cron_authorization_documents_send_mails_xml_action" model="ir.cron">
-            <field name="name">Enviar por correo</field>
+        <record forcecreate="True" id="ir_cron_authorization_invoices_send_mails_xml_action" model="ir.cron">
+            <field name="name">Enviar por correo fact/nc/nd</field>
+            <field eval="True" name="active" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">4</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field eval="True" name="doall" />
+            <field eval="'account.invoice.electronic'" name="model" />
+            <field eval="'send_mail_documents_cron'" name="function" />
+            <field eval="'(False,)'" name="args" />
+        </record>
+        <record forcecreate="True" id="ir_cron_authorization_withhold_send_mails_xml_action" model="ir.cron">
+            <field name="name">Enviar por correo retencion</field>
+            <field eval="True" name="active" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">4</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field eval="True" name="doall" />
+            <field eval="'account.withhold.electronic'" name="model" />
+            <field eval="'send_mail_documents_cron'" name="function" />
+            <field eval="'(False,)'" name="args" />
+        </record>
+        <record forcecreate="True" id="ir_cron_authorization_remission_send_mails_xml_action" model="ir.cron">
+            <field name="name">Enviar por correo guias</field>
             <field eval="True" name="active" />
             <field name="user_id" ref="base.user_root" />
             <field name="interval_number">4</field>
@@ -49,7 +73,7 @@
             <field name="numbercall">-1</field>
             <field eval="True" name="doall" />
             <field eval="'remission.guide.electronic'" name="model" />
-            <field eval="'authorization_documents_cron'" name="function" />
+            <field eval="'send_mail_documents_cron'" name="function" />
             <field eval="'(False,)'" name="args" />
         </record>
     </data>

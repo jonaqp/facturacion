@@ -36,7 +36,7 @@
             <field name="view_id" ref="setting_read_file_tree_view"/>
         </record>
 
-        <menuitem id="setting_read_file_menu" name="Delimitador de Archivo" parent="core_electronic_authorization.settings_electronic_parent" action="action_setting_read_file"/>
+        <menuitem id="setting_read_file_menu" name="Delimitador de Archivo" parent="core_electronic_authorization.settings_electronic_parent" action="action_setting_read_file" groups="group_setting_read_file"/>
 
     </data>
 </odoo>

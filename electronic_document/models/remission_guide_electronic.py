@@ -8,6 +8,7 @@ from core_electronic_authorization.authorization_sri import authorization_docume
 
 class RemissionGuideElectronic(models.Model):
     _name = 'remission.guide.electronic'
+    _inherit = ['mail.thread']
     _rec_name = 'number'
 
     _order = 'number desc'
@@ -100,6 +101,19 @@ class RemissionGuideElectronic(models.Model):
                     remission.lock = False
                 else:
                     self.xml_report = update_xml_report(self)
+
+    @api.multi
+    def send_mail_documents_cron(self, *args):
+        remissions = self.search([('state', '=', 'authorized'), ('sent', '=', False)], order='number asc')
+        ir_model_data = self.env['ir.model.data']
+        for remission in remissions:
+            try:
+                template_id = ir_model_data.get_object_reference('electronic_document', 'email_template_account_withhold_electronic')[1]
+            except ValueError:
+                template_id = False
+            template_id = self.env['mail.template'].browse(template_id)
+            template_id.send_mail(remission.id, force_send=True)
+            remission.sent = True
 
     @api.multi
     def print_document(self):

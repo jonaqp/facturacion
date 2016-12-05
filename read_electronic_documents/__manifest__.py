@@ -3,7 +3,10 @@
 {
     'name' : 'Read Electronic Authorization',
     'version' : '1.0',
-    'data': ['views/file_document_view.xml',
+    'data': [
+             'security/security.xml',
+             'security/ir.model.access.csv',
+             'views/file_document_view.xml',
              'views/setting_file_view.xml',
              'data/settings_data.xml'],
     'depends': ['electronic_document'],

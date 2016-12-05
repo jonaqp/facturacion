@@ -6,6 +6,8 @@
     'version' : '1.0',
     'data': ['reports/report.xml',
              'reports/account_invoice_electronic_report.xml',
+             'security/security.xml',
+             'security/ir.model.access.csv',
              'views/account_invoice_electronic_view.xml',
              'views/account_withhold_electronic_view.xml',
              'views/remission_guide_electronic.xml',

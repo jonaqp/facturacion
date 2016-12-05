@@ -6,6 +6,6 @@ import res_company
 import send_mail_document
 import account_tax_electronic
 import res_users
-import email_template
+import mail_template
 
 

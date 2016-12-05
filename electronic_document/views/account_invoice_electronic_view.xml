@@ -170,7 +170,7 @@
 			<field name="act_window_id" ref="action_account_invoice_electronic_tree_view" />
 		</record>
 
-		<menuitem id="account_invoice_electronic_menu" name="Facturas" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_account_invoice_electronic_tree_view" sequence="1"/>
+		<menuitem id="account_invoice_electronic_menu" name="Facturas" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_account_invoice_electronic_tree_view" sequence="1" groups="group_account_invoice_electronic_manager"/>
 			
 		<!-- Nota de crédito-->
 		<record model="ir.ui.view" id="account_invoice_electronic_nc_tree_view">
@@ -328,7 +328,7 @@
 			<field name="act_window_id" ref="action_account_invoice_electronic_nc_tree_view" />
 		</record>
 			
-		<menuitem id="account_invoice_electronic_nc_menu" name="Notas de crédito" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_account_invoice_electronic_nc_tree_view" sequence="2"/>
+		<menuitem id="account_invoice_electronic_nc_menu" name="Notas de crédito" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_account_invoice_electronic_nc_tree_view" sequence="2" groups="group_account_invoice_electronic_nc_manager"/>
 
     	<!--  Nota de débito -->
 		<record model="ir.ui.view" id="account_debit_electronic_tree_view">
@@ -460,6 +460,6 @@
 			<field name="act_window_id" ref="action_account_invoice_electronic_nd_tree_view" />
 		</record>
 			
-		<menuitem id="account_invoice_ext_nd_menu" name="Notas de débito" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_account_invoice_electronic_nd_tree_view" sequence="3"/>
+		<menuitem id="account_invoice_ext_nd_menu" name="Notas de débito" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_account_invoice_electronic_nd_tree_view" sequence="3" groups="group_account_invoice_electronic_nd_manager"/>
     </data>
 </odoo>

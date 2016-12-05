@@ -42,6 +42,6 @@
             <field name="view_id" ref="digital_signature_tree_view"/>
         </record>
 
-        <menuitem id="setting_digital_signature_menu" name="Firma Digital" parent="core_electronic_authorization.settings_electronic_parent" action="action_digital_signature"/>
+        <menuitem id="setting_digital_signature_menu" name="Firma Digital" parent="core_electronic_authorization.settings_electronic_parent" action="action_digital_signature" groups="group_digital_signature"/>
     </data>
 </odoo>

@@ -3,15 +3,34 @@
 <template id="account_invoice_electronic_report">
     <t t-call="report.html_container">
         <div class="page">
-            <t t-foreach="docs" t-as="o">
-                <div class="col-xs-6 mb92">
-                    <table class="table table-bordered">
-                        <tr>
-                            <td><img t-field="o.company_id.logo"/></td>
-                            <td><img t-if="o.access_key" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('EAN13', o.access_key, 300, 50)" style="width:100%;height:35%;"/></td>
-                            <td><strong t-field="o.number"/></td>
-                            <td><p t-field="o.emission_date"/></td>
-                        </tr>
+            <t t-foreach="docs" t-as="invoice">
+                <div class="col-sm-6">
+                    <img t-att-src="'data:image/png;base64,%s' % (invoice.company_id.logo,)" style="max-height:45pt;max-width:90%"/>
+                    <table style="width:243pt; height:153pt; border: 1pt solid black; border-collapse:separate; border-radius:8pt; margin:5pt">
+                        <td tyle="width:33%;" valign="center">
+                            <tr style="font-size:15pt; margin-bottom:0pt;margin-top:0pt; font:bold">
+                                <p t-field="invoice.company_id.name"/>
+                            </tr>
+                        </td>
+                        <!--<td style="width:33%;" valign="center">
+                            <table style="width:77pt; height:150pt">
+                                <tr style="font-size:15pt; margin-bottom:0pt;margin-top:0pt; font:bold">
+                                    <p t-field="invoice.company_id.name"/>
+                                </tr>
+                                <tr style="height:70%;">
+                                    <td align="center" valign="center">
+                                        <img t-if="invoice.partner_id" t-field="invoice.partner_id.name"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="width:67%" valign="center">
+                            <table style="width:155pt; height:85pt">
+                                <tr><th><div style="font-size:15pt; margin-bottom:0pt;margin-top:0pt;" align="center"><t t-esc="invoice.emission_date"/></div></th></tr>
+                                <tr><td><div align="center" style="font-size:10pt;margin-bottom:5pt;"><t t-esc="invoice.number"/></div></td></tr>
+                                <tr><td><img t-if="invoice.access_key" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', invoice.access_key, 600, 120)" style="max-height:50pt;max-width:100%;" align="center"/></td></tr>
+                            </table>
+                        </td>-->
                     </table>
                 </div>
             </t>

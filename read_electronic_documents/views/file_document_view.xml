@@ -47,7 +47,7 @@
             <field name="view_id" ref="read_file_document_tree_view"/>
         </record>
 
-        <menuitem id="read_file_document_menu_parent" name="Archivos" parent="core_electronic_authorization.document_electronic_parent_menu" sequence="2"/>
+        <menuitem id="read_file_document_menu_parent" name="Archivos" parent="core_electronic_authorization.document_electronic_parent_menu" sequence="2" groups="group_file_documents"/>
         <menuitem id="read_file_document_menu" name="Subir Archivo" parent="read_file_document_menu_parent" action="action_read_file_document"/>
 
     </data>

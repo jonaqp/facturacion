@@ -123,6 +123,6 @@
             <field name="view_id" ref="remission_guide_electronic_tree_view"/>
         </record>
 
-        <menuitem id="remission_guide_electronic_menu" name="Guias de remision" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_remission_guide_electronic_tree_view" sequence="5"/>
+        <menuitem id="remission_guide_electronic_menu" name="Guias de remision" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_remission_guide_electronic_tree_view" sequence="5" groups="group_remission_guide_electronic_manager"/>
     </data>
 </odoo>

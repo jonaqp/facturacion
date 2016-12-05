@@ -8,6 +8,7 @@ from core_electronic_authorization.authorization_sri import authorization_docume
 
 class AccountInvoiceElectronic(models.Model):
     _name = 'account.invoice.electronic'
+    _inherit = ['mail.thread']
     _rec_name = 'number'
     _order = 'number desc'
 
@@ -139,6 +140,25 @@ class AccountInvoiceElectronic(models.Model):
                     invoice.lock = False
                 else:
                     self.xml_report = update_xml_report(self)
+
+    @api.multi
+    def send_mail_documents_cron(self, *args):
+        invoices = self.search([('state', '=', 'authorized'), ('sent', '=', False)], order='type asc')
+        ir_model_data = self.env['ir.model.data']
+        for invoice in invoices:
+            if invoice.type == 'factura':
+                template = 'email_template_account_invoice_electronic'
+            elif invoice.type == 'credito':
+                template = 'email_template_account_invoice_nc_electronic'
+            else:
+                template = 'email_template_account_invoice_nd_electronic'
+            try:
+                template_id = ir_model_data.get_object_reference('electronic_document', template)[1]
+            except ValueError:
+                template_id = False
+            template_id = self.env['mail.template'].browse(template_id)
+            template_id.send_mail(invoice.id, force_send=True)
+            invoice.sent = True
 
     @api.multi
     def print_document(self):

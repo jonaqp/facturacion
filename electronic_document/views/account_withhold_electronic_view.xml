@@ -126,6 +126,6 @@
             <field name="view_id" ref="account_withhold_electronic_tree_view"/>
         </record>
 
-        <menuitem id="account_witthold_electronic_menu" name="Compr. de retenciones" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_account_withhold_electronic_tree_view" sequence="4"/>
+        <menuitem id="account_witthold_electronic_menu" name="Compr. de retenciones" parent="core_electronic_authorization.document_electronic_parent_menu_1" action="action_account_withhold_electronic_tree_view" sequence="4" groups="group_account_withhold_electronic_manager"/>
     </data>
 </odoo>

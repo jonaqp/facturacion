@@ -8,6 +8,7 @@ from core_electronic_authorization.authorization_sri import authorization_docume
 
 class AccountWithholdElectronic(models.Model):
     _name = 'account.withhold.electronic'
+    _inherit = ['mail.thread']
     _rec_name = 'number'
 
     @api.model
@@ -97,6 +98,19 @@ class AccountWithholdElectronic(models.Model):
                     withhold.lock = False
                 else:
                     self.xml_report = update_xml_report(self)
+
+    @api.multi
+    def send_mail_documents_cron(self, *args):
+        withholds = self.search([('state', '=', 'authorized'), ('sent', '=', False)], order='number asc')
+        ir_model_data = self.env['ir.model.data']
+        for withhold in withholds:
+            try:
+                template_id = ir_model_data.get_object_reference('electronic_document', 'email_template_account_withhold_electronic')[1]
+            except ValueError:
+                template_id = False
+            template_id = self.env['mail.template'].browse(template_id)
+            template_id.send_mail(withhold.id, force_send=True)
+            withhold.sent = True
 
     @api.multi
     def print_document(self):
