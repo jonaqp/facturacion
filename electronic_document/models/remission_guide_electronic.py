@@ -80,16 +80,14 @@ class RemissionGuideElectronic(models.Model):
     @api.multi
     def change_state_to(self):
         for remission in self:
-            remission.state = 'loaded'
-            remission.number = self._get_number()
             access_key = generate_access_key(self, remission)
-            remission.access_key = access_key
-            remission.electronic_authorization = access_key
+            remission.write({'state': 'loaded', 'number': self._get_number(), 'access_key': access_key,
+                             'electronic_authorization': access_key})
 
     @api.one
     def change_access_key(self):
-        self.access_key = generate_access_key(self, self)
-        self.electronic_authorization = self.access_key
+        access_key = generate_access_key(self, self)
+        self.write({'access_key': access_key, 'electronic_authorization': access_key})
 
     @api.multi
     def authorization_documents_cron(self, *args):

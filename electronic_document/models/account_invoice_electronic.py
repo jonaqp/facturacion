@@ -24,8 +24,8 @@ class AccountInvoiceElectronic(models.Model):
         sequence = self.env['ir.sequence']
         printer_point = self.env['res.users'].browse(self._uid).printer_point
         return sequence.next_by_code(context.get('type') + printer_point)
+
     dat = pytz.utc.localize(datetime.now()).astimezone(pytz.timezone('America/Guayaquil'))
-    print dat.date
     number = fields.Char(string="Numero", size=17, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)], 'unauthorized': [('readonly', True)], 'draft': [('required', False)]})
     emission_date = fields.Date(string="Fecha Emisión", required=True, default=dat.date,  states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     type = fields.Selection([('factura', 'Factura'),
@@ -69,8 +69,8 @@ class AccountInvoiceElectronic(models.Model):
 
     @api.one
     def change_access_key(self):
-        self.access_key = generate_access_key(self, self)
-        self.electronic_authorization = self.access_key
+        access_key = generate_access_key(self, self)
+        self.write({'access_key': access_key, 'electronic_authorization': access_key})
 
     @api.multi
     def unlink(self):
@@ -97,28 +97,26 @@ class AccountInvoiceElectronic(models.Model):
                  'modification_value')
     def _get_total_invoice(self):
         tax = 0.0
+        subtotal_taxed = subtotal_0 = 0.0
         if self.type == 'debito':
-            self.subtotal_taxed += self.modification_value
+            subtotal_taxed = self.modification_value
             tax += self.modification_value * 0.14
         else:
             for line in self.line_id:
                 if line.tax.code == '0':
-                    self.subtotal_0 += round(line.total, 2)
+                    subtotal_0 += round(line.total, 2)
                 else:
-                    self.subtotal_taxed += round(line.total, 2)
+                    subtotal_taxed += round(line.total, 2)
                     tax += round(line.total * line.tax.percentage / 100, 2)
-        self.taxed = tax
-        self.subtotal = self.subtotal_taxed + self.subtotal_0
-        self.total = self.taxed + self.subtotal - self.tax_comp
+        self.write({'taxed': tax, 'subtotal_taxed': subtotal_taxed, 'subtotal_0': subtotal_0,
+                    'subtotal': subtotal_taxed + subtotal_0, 'total': tax + subtotal_taxed + subtotal_0 - self.tax_comp})
 
     @api.multi
     def change_state_to(self):
         for invoice in self:
-            invoice.state = 'loaded'
-            invoice.number = self._get_number()
             access_key = generate_access_key(self, invoice)
-            invoice.access_key = access_key
-            invoice.electronic_authorization = access_key
+            invoice.write({'state': 'loaded', 'number': self._get_number(),
+                           'access_key': access_key, 'electronic_authorization': access_key})
 
     @api.one
     def authorization_document_button(self):
@@ -215,7 +213,6 @@ class AccountInvoiceElectronicLine(models.Model):
     discount = fields.Float(string="Descuento")
     total = fields.Float(string="Total", required=True, compute='_get_total_line')
     tax = fields.Many2one('account.tax.electronic', string='Impuesto', required=True)
-    # tax = fields.Selection([('0', '0%'),('2', '12%'), ('3', '14%')], string="Codigo Impuesto", required=True)
     invoice_id = fields.Many2one('account.invoice.electronic', string="Facturas")
 
     @api.one

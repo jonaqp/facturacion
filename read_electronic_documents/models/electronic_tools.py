@@ -10,7 +10,6 @@ from core_electronic_authorization.authorization_sri import generate_access_key
 import plantilla_factura
 import plantilla_retencion
 import plantilla_guia
-import base64
 
 
 def check_document(obj, number, model, document_type=''):
