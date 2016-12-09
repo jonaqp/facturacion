@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api
 from datetime import datetime
+import pytz
 from odoo.exceptions import UserError
 from core_electronic_authorization.authorization_sri import authorization_document, generate_access_key, update_xml_report
 
@@ -22,8 +23,9 @@ class AccountWithholdElectronic(models.Model):
         printer_point = self.env['res.users'].browse(self._uid).printer_point
         return sequence.next_by_code('withhold' + printer_point)
 
+    dat = pytz.utc.localize(datetime.now()).astimezone(pytz.timezone('America/Guayaquil'))
     number = fields.Char(string="Numero", size=17,  states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)], 'unauthorized': [('readonly', True)], 'draft': [('required', False)]})
-    emission_date = fields.Date(string="Fecha Emisión", required=True, default=datetime.now, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    emission_date = fields.Date(string="Fecha Emisión", required=True, default=dat.date, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     access_key = fields.Char(string="Clave de Acceso", size=49, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     electronic_authorization = fields.Char(string="Autorización Electrónica", size=49, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     authorization_date = fields.Datetime(string="Fecha y Hora de Autorización", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})

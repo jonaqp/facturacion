@@ -4,8 +4,8 @@
     <t t-call="report.html_container">
         <div class="page">
             <t t-foreach="docs" t-as="invoice">
-                <div class="col-sm-6">
-                    <img t-att-src="'data:image/png;base64,%s' % (invoice.company_id.logo,)" style="max-height:45pt;max-width:90%"/>
+                <div class="col-sm-2">
+                    <img t-att-src="'data:image/png;base64,%s' % (invoice.company_id.logo,)" style="max-height:45pt;max-width:90%;valign:center"/>
                     <table style="width:243pt; height:153pt; border: 1pt solid black; border-collapse:separate; border-radius:8pt; margin:5pt">
                         <td tyle="width:33%;" valign="center">
                             <tr style="font-size:15pt; margin-bottom:0pt;margin-top:0pt; font:bold">

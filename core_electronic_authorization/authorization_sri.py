@@ -99,22 +99,26 @@ def get_percentage(tax):
 
 def do_digital_signature(obj, document_xml, type_document):
     from py4j.java_gateway import JavaGateway, GatewayClient
+    import tempfile
     digital_signature = obj.env['digital.signature'].search([])
     if not digital_signature:
         raise UserError("No tiene una firma digital configurada")
     path, key = digital_signature.path_digital_signature, digital_signature.password_signature
-    path_in_xml = open("in_xml.xml", "w")
-    document_xml = '<?xml version="1.0" encoding="UTF-8" ?>' + tostring(document_xml, encoding='utf-8')
+    path_in_xml = tempfile.NamedTemporaryFile(suffix='.xml')  # open("/home/in_xml.xml", "w")
+    document_xml = '<?xml version="1.0" encoding="UTF-8" ?>\n' + tostring(document_xml)
     path_in_xml.write(document_xml)
-    path_in_xml.close()
-    current_directory = os.getcwd()
+    path_in_xml.flush()
+    path_out_xml = tempfile.NamedTemporaryFile(suffix='.xml')
     try:
         gateway = JavaGateway(GatewayClient(port=10010))
         entrypt = gateway.entry_point.getGenericXMLSignature()
-        entrypt.execute(current_directory+'/'+'in_xml.xml', current_directory+'/', 'out_xml.xml', type_document, path, key)
-        document_xml = open('out_xml.xml', 'r')
-        data = document_xml.read()
-        document_xml.close()
+        file_split = path_out_xml.name.split("/")
+        name_file = file_split[-1]
+        path_file = "/".join(file_split[:-1])
+        entrypt.execute(path_in_xml.name, path_file+'/', name_file, type_document, path, key)
+        data = path_out_xml.read()
+        path_out_xml.close()
+        path_in_xml.close()
         return data
     except Exception as e:
         return False
@@ -165,7 +169,7 @@ def authorization_document(document_id):
         document_xml, type_document = generate_xml_remission(document_id, environment)
     document_signed = do_digital_signature(document_id, document_xml, type_document)
     if not document_signed:
-        raise UserError('No se encuentra el servicio que firma el document, favor contactar con su administrador.')
+        raise UserError('No se encuentra el servicio que firma el documento, favor contactar con su administrador.')
     signed_document_xml = base64.b64encode(document_signed)
     document_id.write({'xml_report': signed_document_xml, 'xml_name': document_id.access_key + '.xml'})
     webservice_obj = document_id.env['webservice.sri']

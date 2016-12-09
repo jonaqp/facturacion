@@ -2,6 +2,7 @@
 
 from odoo import fields, models, api
 from datetime import datetime
+import pytz
 from odoo.exceptions import UserError
 from core_electronic_authorization.authorization_sri import authorization_document, generate_access_key, update_xml_report
 
@@ -23,9 +24,10 @@ class AccountInvoiceElectronic(models.Model):
         sequence = self.env['ir.sequence']
         printer_point = self.env['res.users'].browse(self._uid).printer_point
         return sequence.next_by_code(context.get('type') + printer_point)
-
+    dat = pytz.utc.localize(datetime.now()).astimezone(pytz.timezone('America/Guayaquil'))
+    print dat.date
     number = fields.Char(string="Numero", size=17, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)], 'unauthorized': [('readonly', True)], 'draft': [('required', False)]})
-    emission_date = fields.Date(string="Fecha Emisión", required=True, default=datetime.now,  states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
+    emission_date = fields.Date(string="Fecha Emisión", required=True, default=dat.date,  states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     type = fields.Selection([('factura', 'Factura'),
                              ('credito', 'Nota de Crédito'),
                              ('debito', 'Nota de Débito')], string='Tipo')

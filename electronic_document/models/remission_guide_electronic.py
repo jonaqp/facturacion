@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api
 from datetime import datetime
+import pytz
 from odoo.exceptions import UserError
 from core_electronic_authorization.authorization_sri import authorization_document, generate_access_key, update_xml_report
 
@@ -30,10 +31,11 @@ class RemissionGuideElectronic(models.Model):
             raise UserError("No es posible eliminar un documento autorizado o por autorizar. Contacte con el administrador de sistema")
         return super(RemissionGuideElectronic, self).unlink()
 
+    dat = pytz.utc.localize(datetime.now()).astimezone(pytz.timezone('America/Guayaquil'))
     number = fields.Char(string="Numero", size=17, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)], 'unauthorized': [('readonly', True)], 'draft': [('required', False)]})
-    emission_date = fields.Date(string="Fecha Inicio Transporte", required=True, default=datetime.now,
+    emission_date = fields.Date(string="Fecha Inicio Transporte", required=True, default=dat.date,
                                       states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
-    emission_date_stop = fields.Date(string="Fecha Fin Transporte", required=True, default=datetime.now,
+    emission_date_stop = fields.Date(string="Fecha Fin Transporte", required=True, default=dat.date,
                                      states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     access_key = fields.Char(string="Clave de Acceso", size=49, states={'authorized': [('readonly', True)],  'loaded': [('readonly', True)]})
     electronic_authorization = fields.Char(string="Autorización Electrónica", size=49, states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
