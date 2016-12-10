@@ -11,6 +11,7 @@ class AccountWithholdElectronic(models.Model):
     _name = 'account.withhold.electronic'
     _inherit = ['mail.thread']
     _rec_name = 'number'
+    _order = 'number'
 
     @api.model
     def _get_company_id(self):
@@ -167,4 +168,4 @@ class AccountWithholdElectronicLine(models.Model):
     @api.one
     @api.depends('tax', 'base_amount')
     def _get_tax_amount(self):
-        self.tax_amount = self.base_amount * self.tax/100
+        self.tax_amount = self.base_amount * self.tax/100.0

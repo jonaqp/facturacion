@@ -11,7 +11,6 @@ class RemissionGuideElectronic(models.Model):
     _name = 'remission.guide.electronic'
     _inherit = ['mail.thread']
     _rec_name = 'number'
-
     _order = 'number desc'
 
     @api.model
