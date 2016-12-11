@@ -7,11 +7,33 @@
                 <div class="col-sm-2">
                     <img t-att-src="'data:image/png;base64,%s' % (invoice.company_id.logo,)" style="max-height:45pt;max-width:90%;valign:center"/>
                     <table style="width:243pt; height:153pt; border: 1pt solid black; border-collapse:separate; border-radius:8pt; margin:5pt">
-                        <td tyle="width:33%;" valign="center">
-                            <tr style="font-size:15pt; margin-bottom:0pt;margin-top:0pt; font:bold">
-                                <p t-field="invoice.company_id.name"/>
-                            </tr>
-                        </td>
+                        <tr valign="center">
+                            <td style="font-size:15pt; margin-bottom:0pt;margin-top:0pt; font:bold" valign="center">
+                                <p style="margin-left:60%" class="text-center" t-field="invoice.company_id.name"/>
+                            </td>
+                        </tr>
+
+                        <tr style="border: 1pt" valign="center">
+                            <td ><strong style="margin-left:15pt">Direccion:</strong></td>
+                            <td style="font-size:10pt; margin-bottom:0pt;margin-top:0pt; font:bold" valign="center">
+                                <p class="text-left" t-field="invoice.company_id.street"/>
+                            </td>
+                            <td class="text-right"/>
+                            <td class="text-right"/>
+                        </tr>
+                        <tr style="border: 1pt" valign="center">
+                            <td><strong style="margin-left:15pt">Telefono:</strong></td>
+                            <td style="font-size:10pt; margin-bottom:0pt;margin-top:0pt; font:bold" valign="center">
+                                <p class="text-left" t-field="invoice.company_id.phone"/>
+                            </td>
+                            <td class="text-right"/>
+                            <td class="text-right"/>
+                        </tr>
+                        <tr style="border: 1pt" valign="center">
+                            <div t-if="invoice.company_id.must_account" >
+                            <td><strong class="text-center">Obligado a llevar contabilidad</strong></td>
+                            </div>
+                        </tr>
                         <!--<td style="width:33%;" valign="center">
                             <table style="width:77pt; height:150pt">
                                 <tr style="font-size:15pt; margin-bottom:0pt;margin-top:0pt; font:bold">
@@ -32,6 +54,7 @@
                             </table>
                         </td>-->
                     </table>
+
                 </div>
             </t>
         </div>
