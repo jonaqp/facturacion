@@ -3,6 +3,7 @@
 {
     'name' : 'Read Electronic Authorization',
     'version' : '1.0',
+    'author': 'BPC INGENIEROS',
     'data': [
              'security/security.xml',
              'security/ir.model.access.csv',
