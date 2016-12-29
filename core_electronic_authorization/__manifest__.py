@@ -4,7 +4,7 @@
     'name' : 'Core Electronic Authorization',
     'version' : '1.0',
     'author': 'BPC INGENIEROS',
-    'depends': [],
+    'depends': ['base'],
     'data': [
              'security/security.xml',
              'security/ir.model.access.csv',
