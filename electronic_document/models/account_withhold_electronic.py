@@ -9,7 +9,7 @@ from core_electronic_authorization.authorization_sri import authorization_docume
 
 class AccountWithholdElectronic(models.Model):
     _name = 'account.withhold.electronic'
-    _inherit = 'mail.thread'
+    _inherit = ['mail.thread']
     _rec_name = 'number'
     _order = 'number'
 

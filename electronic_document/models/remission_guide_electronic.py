@@ -9,7 +9,7 @@ from core_electronic_authorization.authorization_sri import authorization_docume
 
 class RemissionGuideElectronic(models.Model):
     _name = 'remission.guide.electronic'
-    _inherit = 'mail.thread'
+    _inherit = ['mail.thread']
     _rec_name = 'number'
     _order = 'number desc'
 
