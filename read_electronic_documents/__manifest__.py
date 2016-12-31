@@ -10,7 +10,7 @@
              'views/file_document_view.xml',
              'views/setting_file_view.xml',
              'data/settings_data.xml'],
-    'depends': ['electronic_document'],
+    'depends': ['base', 'electronic_document'],
     'installable': True,
     'application': True,
     'auto_install': False,

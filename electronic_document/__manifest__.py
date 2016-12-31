@@ -20,7 +20,7 @@
              'data/data_payment_method.xml',
              'data/cron_jobs.xml',
              'data/email_template_data.xml'],
-    'depends': ['mail','core_electronic_authorization'],
+    'depends': ['base', 'mail', 'core_electronic_authorization'],
     'installable': True,
     'application': True,
     'auto_install': False,
