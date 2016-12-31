@@ -520,7 +520,6 @@ class DigitalSignature(models.Model):
 
     @api.model
     def create(self, values):
-        raise Exception(os.getcwd())
         with open(values.get('name'), 'w+') as fp:
             fp.write(base64.b64decode(values['electronic_signature']))
         values['path_digital_signature'] = os.getcwd() + '/' + values.get('name')
