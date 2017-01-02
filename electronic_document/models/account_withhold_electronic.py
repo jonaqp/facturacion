@@ -72,9 +72,10 @@ class AccountWithholdElectronic(models.Model):
     @api.multi
     def change_state_to(self):
         for withhold in self:
-            access_key = generate_access_key(self, withhold)
+            number = self._get_number()
+            access_key = generate_access_key(self, withhold, number)
             withhold.write({'state': 'loaded', 'access_key': access_key, 'electronic_authorization': access_key,
-                            'number': self._get_number()})
+                            'number': number})
 
     @api.one
     def authorization_document_button(self):

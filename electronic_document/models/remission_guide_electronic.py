@@ -79,8 +79,9 @@ class RemissionGuideElectronic(models.Model):
     @api.multi
     def change_state_to(self):
         for remission in self:
-            access_key = generate_access_key(self, remission)
-            remission.write({'state': 'loaded', 'number': self._get_number(), 'access_key': access_key,
+            number = self._get_number()
+            access_key = generate_access_key(self, remission, number)
+            remission.write({'state': 'loaded', 'number': number, 'access_key': access_key,
                              'electronic_authorization': access_key})
 
     @api.one

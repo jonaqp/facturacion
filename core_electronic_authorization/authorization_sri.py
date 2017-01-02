@@ -26,14 +26,13 @@ def digito_verificador_md11(numeros):
     return str(resultado)
 
 
-def generate_access_key(obj, document_id):
+def generate_access_key(obj, document_id, number):
     ruc_company = document_id.company_id.vat
     if not ruc_company:
         raise UserError("Favor configurar el RUC de la compañia para generar la clave de acceso")
     ruc_company = ruc_company[2:]
     webservice_id = obj.env['webservice.sri'].get_webservice_sri()
     environment = webservice_id.environment
-    number = document_id.number
     if document_id._name == 'account.withhold.electronic':
         compr = '07'
     elif document_id._name == 'remission.guide.electronic':

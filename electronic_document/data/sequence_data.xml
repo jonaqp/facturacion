@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="1">
+
+  	<record model="ir.sequence" id="sequence_invoice">
+        <field name="code">factura001</field>
+        <field name="name">Factura para 001</field>
+        <field name="prefix">001-001-</field>
+        <field name="padding">9</field>
+        <field eval="1" name="number_next"/>
+        <field eval="1" name="number_increment"/>
+    </record>
+
+    <record model="ir.sequence" id="sequence_invoice_nc">
+        <field name="code">credito001</field>
+        <field name="name">Credito para 001</field>
+        <field name="prefix">001-001-</field>
+        <field name="padding">9</field>
+        <field eval="1" name="number_next"/>
+        <field eval="1" name="number_increment"/>
+    </record>
+
+    <record model="ir.sequence" id="sequence_invoice_nd">
+        <field name="code">debito001</field>
+        <field name="name">Debito para 001</field>
+        <field name="prefix">001-001-</field>
+        <field name="padding">9</field>
+        <field eval="1" name="number_next"/>
+        <field eval="1" name="number_increment"/>
+    </record>
+
+    <record model="ir.sequence" id="sequence_withhold">
+        <field name="code">withhold001</field>
+        <field name="name">Retencion para 001</field>
+        <field name="prefix">001-001-</field>
+        <field name="padding">9</field>
+        <field eval="1" name="number_next"/>
+        <field eval="1" name="number_increment"/>
+    </record>
+
+    <record model="ir.sequence" id="sequence_remission">
+        <field name="code">remission001</field>
+        <field name="name">Guia para 001</field>
+        <field name="prefix">001-001-</field>
+        <field name="padding">9</field>
+        <field eval="1" name="number_next"/>
+        <field eval="1" name="number_increment"/>
+    </record>
+
+   </data>
+</odoo>
