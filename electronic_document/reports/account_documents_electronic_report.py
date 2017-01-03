@@ -26,21 +26,42 @@ class AccountDocumentsElectronicReport:
         pdf = canvas.Canvas('%s-%s.pdf' % (self.name, self.object.number))
         pdf = self.put_corner_left_data(pdf)
         pdf = self.put_corner_right_data(pdf)
-        if self.object.name.lower() == 'factura':
+        if self.name.lower() == 'factura':
             pdf = self.put_middle_data_factura(pdf)
-        if self.object.name.lower() == 'nota de credito':
+        elif self.name.lower() == 'nota de credito':
             pdf = self.put_middle_data_nc(pdf)
-        if self.object.name.lower() == 'nota de debito':
+        elif self.name.lower() == 'nota de debito':
             pdf = self.put_middle_data_nd(pdf)
-        if self.object.name.lower() == 'comprobante de retencion':
+        elif self.name.lower() == 'comprobante de retencion':
             pdf = self.put_middle_data_withhold(pdf)
-        if self.object.name.lower() == 'guia de remision':
+        else:
             pdf = self.put_middle_data_remission(pdf)
         pdf.showPage()
         pdf.save()
 
     def put_middle_data_factura(self, pdf):
-        pass
+        pdf.setFont('Times-Bold', 10)
+        pdf.drawString(60, 580, 'Razon Social:')
+        pdf.setFont('Times-Roman', 10)
+        pdf.drawString(125, 580, self.object.partner_id.name)
+        pdf.setFont('Times-Bold', 10)
+        pdf.drawString(60, 560, 'Direccion:')
+        pdf.setFont('Times-Roman', 10)
+        pdf.drawString(125, 560, self.object.partner_id.street)
+        pdf.setFont('Times-Bold', 10)
+        pdf.drawString(60, 540, 'Cedula/RUC:')
+        pdf.setFont('Times-Roman', 10)
+        pdf.drawString(125, 540, self.object.partner_id.vat[2:])
+        pdf.setFont('Times-Bold', 10)
+        pdf.drawString(380, 580, 'Fecha de Emision:')
+        pdf.setFont('Times-Roman', 10)
+        pdf.drawString(465, 580, self.object.emission_date)
+        pdf.setFont('Times-Bold', 10)
+        pdf.drawString(380, 560, 'Telefono:')
+        pdf.setFont('Times-Roman', 10)
+        pdf.drawString(460, 520, self.object.partner_id.phone)
+        pdf.rect(50, 530, 530, 65)
+        return pdf
 
     def put_middle_data_nc(self, pdf):
         pass
