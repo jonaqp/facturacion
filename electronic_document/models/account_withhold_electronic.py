@@ -116,11 +116,16 @@ class AccountWithholdElectronic(models.Model):
 
     @api.multi
     def print_document(self):
+        from electronic_document.reports.account_documents_electronic_report import AccountDocumentsElectronicReport
+        import base64
+        import tempfile
         for withhold in self:
-            att_id = self.env['ir.attachment'].search([('res_model', '=', withhold._name), ('res_id', '=', withhold.id)])
-            if att_id:
-                att_id.unlink()
-            return self.env['report'].get_action([withhold.id], 'electronic_document.account_invoice_electronic_report')
+            path_in_xml = tempfile.NamedTemporaryFile(suffix='.png', mode='wb')
+            path_in_xml.write(base64.decodestring(withhold.company_id.logo))
+            path_in_xml.flush()
+            report = AccountDocumentsElectronicReport(withhold, 'COMPROBANTE DE RETENCION', path_in_xml.name)
+            report.generate_pdf()
+            path_in_xml.close()
 
     @api.multi
     def send_mail_document(self):
