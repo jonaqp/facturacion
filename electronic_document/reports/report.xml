@@ -1,59 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <report
-            id="account_invoice_electronic"
-            model="account.invoice.electronic"
-            string="Invoices"
-            report_type="qweb-pdf"
-            name="electronic_document.account_invoice_electronic_report"
-            file="electronic_document.account_invoice_electronic_report"
-            attachment_use="True"
-            attachment="('Factura Electronica'+'.pdf')"
-        />
-
-        <report
-            id="account_invoice_electronic_nc"
-            model="account.invoice.electronic"
-            string="Invoices"
-            report_type="qweb-pdf"
-            name="electronic_document.account_invoice_electronic_nc"
-            file="electronic_document.account_invoice_electronic_nc"
-            attachment_use="True"
-            attachment="('Nota de Credito Electronica'+'.pdf')"
-        />
-
-        <report
-            id="account_invoice_electronic_nd"
-            model="account.invoice.electronic"
-            string="Invoices"
-            report_type="qweb-pdf"
-            name="electronic_document.account_invoice_electronic_nd"
-            file="electronic_document.account_invoice_electronic_nd"
-            attachment_use="True"
-            attachment="('Nota de Debito Electronica'+'.pdf')"
-        />
-
-        <report
-            id="account_withhold_electronic"
-            model="account.withhold.electronic"
-            string="Retenciones"
-            report_type="qweb-pdf"
-            name="electronic_document.account_withhold_electronic"
-            file="electronic_document.account_withhold_electronic"
-            attachment_use="True"
-            attachment="('Comprobante de Retencion Electronica'+'.pdf')"
-        />
-
-        <report
-            id="remission_guide_electronic"
-            model="remission.guide.electronic"
-            string="Guias"
-            report_type="qweb-pdf"
-            name="electronic_document.remission_guide_electronic"
-            file="electronic_document.remission_guide_electronic"
-            attachment_use="True"
-            attachment="('Guia de Remision Electronica'+'.pdf')"
-        />
+        <record id="account_documents_electronic_report" model="ir.actions.report.xml">
+          <field name="name">Documentos</field>
+          <field name="model">account.invoice.electronic</field>
+          <field name="type">ir.actions.report.xml</field>
+          <field name="report_name">document_electronic_report</field>
+          <field name="report_type">pdf</field>
+          <field name="auto" eval="False"/>
+        </record>
     </data>
 </odoo>
