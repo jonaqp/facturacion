@@ -1,0 +1,58 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          signature
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# X-Interactive:     true
+# Short-Description: Start/stop signature server
+### END INIT INFO
+
+case $1 in
+    start)
+        echo "Starting signature ..."
+        if [ ! -f /usr/local/pid ]; then
+            nohup java -jar /usr/local/signature_electronic_sri.jar /usr/local/ 2>> /dev/null >> /dev/null &
+            echo $! > /usr/local/pid
+            echo "signature started ..."
+
+        elif [ -f /usr/local/pid ]; then
+            rm /usr/local/pid
+            echo "delete PID ..."
+            nohup java -jar /usr/local/signature_electronic_sri.jar /usr/local/signature 2>> /dev/null >> /dev/null &
+            echo $! > /usr/local/pid
+            echo "signature started ..."
+
+        else
+            echo "signature is already running ..."
+        fi
+    ;;
+    stop)
+        if [ -f /usr/local/pid ]; then
+            PID=$(cat /usr/local/pid);
+            echo "Stopping signature ..."
+            kill $PID;
+            echo "signature stopped ..."
+            rm /usr/local/pid
+        else
+            echo "signature is not running ..."
+        fi
+    ;;
+    restart)
+        if [ -f /usr/local/signature/pid ]; then
+            PID=$(cat /usr/local/pid);
+            echo "Stopping signature ...";
+            kill $PID;
+            echo "signature stopped ...";
+            rm /usr/local/pid
+
+            echo "Starting signature ..."
+            nohup java -jar /usr/local/signature_electronic_sri.jar /usr/local 2>> /dev/null >> /dev/null &
+            echo $! > /usr/local/pid
+            echo "signature started ..."
+        else
+            echo "signature is not running ..."
+        fi
+    ;;
+esac

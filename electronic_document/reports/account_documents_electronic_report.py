@@ -29,7 +29,8 @@ class AccountDocumentsElectronicReport:
         return re.sub("([0-9]{4})-([0-9]{2})-([0-9]{2})", r"\3/\2/\1", fecha)
 
     def generate_pdf(self):
-        pdf = canvas.Canvas('%s-%s.pdf' % (self.name, self.object.number))
+        name = "%s-%s.pdf" % (self.name, self.object.number)
+        pdf = canvas.Canvas(name)
         pdf = self.put_corner_left_data(pdf)
         pdf = self.put_corner_right_data(pdf)
         if self.name.lower() == 'factura':
@@ -44,6 +45,7 @@ class AccountDocumentsElectronicReport:
             pdf = self.put_middle_data_remission(pdf)
         pdf.showPage()
         pdf.save()
+        return name
 
     def format_monetary(self, value):
         return "${:.2f}".format(value)
@@ -84,7 +86,7 @@ class AccountDocumentsElectronicReport:
         pdf.drawString(538, 510, 'Total')
         pdf.rect(50, 503, 530, 20)
         data = []
-        for line in self.object.line_id:
+        for i, line in enumerate(self.object.line_id):
             data.append((line.code, line.name, line.quantity, self.format_monetary(line.price_unit), self.format_monetary(line.discount), self.format_monetary(line.total)))
         table = Table(data, colWidths=[3.05 * cm, 8.5 * cm, 1.80 * cm,
                                2 * cm, 1.56 * cm, 1.8 * cm])
@@ -93,8 +95,30 @@ class AccountDocumentsElectronicReport:
             ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
             ('FONTSIZE', (0, 0), (-1, -1), 8)
         ]))
-        table.wrapOn(pdf, 50, 467)
-        table.drawOn(pdf, 50, 467)
+        table.wrapOn(pdf, 50, 467*i*0.5)
+        table.drawOn(pdf, 50, 467*i*0.5)
+        del data
+        pdf.setFont('Times-Bold', 9)
+        pdf.drawString(100, 430, 'Forma de Pago')
+        pdf.setFont('Times-Bold', 9)
+        pdf.drawString(230, 430, 'Monto')
+        pdf.setFont('Times-Bold', 9)
+        pdf.drawString(275, 430, 'Plazo')
+        pdf.setFont('Times-Bold', 9)
+        pdf.drawString(340, 430, 'Unidad')
+        pdf.rect(50, 418, 290, 20)
+        data = []
+        for paid in self.object.payment_ids:
+            data.append((paid.payment_id.name, self.format_monetary(paid.amount), paid.plazo, paid.unit or ''))
+        table = Table(data, colWidths=[6.05 * cm, 1.5 * cm, 1.80 * cm,
+                                       2 * cm])
+        table.setStyle(TableStyle([
+            ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('BOX', (0, 0), (-1, -1), 0.5, colors.black),
+            ('FONTSIZE', (0, 0), (-1, -1), 7)
+        ]))
+        table.wrapOn(pdf, 50, 400)
+        table.drawOn(pdf, 50, 400)
         return pdf
 
     def put_middle_data_nc(self, pdf):
