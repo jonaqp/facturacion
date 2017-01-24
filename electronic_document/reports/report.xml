@@ -1,13 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="account_documents_electronic_report" model="ir.actions.report.xml">
-          <field name="name">Documentos</field>
-          <field name="model">account.invoice.electronic</field>
-          <field name="type">ir.actions.report.xml</field>
-          <field name="report_name">document_electronic_report</field>
-          <field name="report_type">pdf</field>
-          <field name="auto" eval="False"/>
-        </record>
+        <report
+             id="account_invoice_electronic_fact"
+             model="account.invoice.electronic"
+             string="Facturas"
+             report_type="qweb-pdf"
+             name="electronic_document.account_invoice_electronic_report_fact"
+             file="electronic_document.account_invoice_electronic_report_fact"
+        />
+        <report
+             id="account_invoice_electronic_nc"
+             model="account.invoice.electronic"
+             string="Notas de credito"
+             report_type="qweb-pdf"
+             name="electronic_document.account_invoice_electronic_report_nc"
+             file="electronic_document.account_invoice_electronic_report_nc"
+        />
+        <report
+             id="account_invoice_electronic_nd"
+             model="account.invoice.electronic"
+             string="Notas de debito"
+             report_type="qweb-pdf"
+             name="electronic_document.account_invoice_electronic_report_nd"
+             file="electronic_document.account_invoice_electronic_report_nd"
+        />
+        <report
+             id="account_withhold_electronic"
+             model="account.withhold.electronic"
+             string="Retenciones"
+             report_type="qweb-pdf"
+             name="electronic_document.account_withhold_electronic_report"
+             file="electronic_document.account_withhold_electronic_report"
+        />
+        <report
+             id="remission_guide_electronic"
+             model="remission.guide.electronic"
+             string="Guias"
+             report_type="qweb-pdf"
+             name="electronic_document.remission_guide_electronic_report"
+             file="electronic_document.remission_guide_electronic_report"
+        />
     </data>
 </odoo>

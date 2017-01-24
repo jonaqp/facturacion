@@ -117,6 +117,11 @@ class AccountInvoiceElectronic(models.Model):
     @api.multi
     def change_state_to(self):
         for invoice in self:
+            total = 0.0
+            for paid in invoice.payment_ids:
+                total += paid.amount
+            if invoice.total != total:
+                raise UserError("El total de las formas de pagos es distinto al total de la factura")
             number = self._get_number()
             access_key = generate_access_key(self, invoice, number)
             invoice.write({'state': 'loaded', 'number': number,
@@ -200,23 +205,17 @@ class AccountInvoiceElectronic(models.Model):
 
     @api.multi
     def print_document(self):
-        from electronic_document.reports.account_documents_electronic_report import AccountDocumentsElectronicReport
-        import base64
-        import tempfile
-
         for invoice in self:
+            att_id = self.env['ir.attachment'].search([('res_model', '=', invoice._name), ('res_id', '=', invoice.id)])
+            if att_id:
+                att_id.unlink()
             if invoice.type == 'factura':
-                tipo = 'FACTURA'
+                template = 'electronic_document.account_invoice_electronic_report_fact'
             elif invoice.type == 'credito':
-                tipo = 'NOTA DE CREDITO'
+                template = 'electronic_document.account_invoice_electronic_report_nc'
             else:
-                tipo = 'NOTA DE DEBITO'
-            path_in_xml = tempfile.NamedTemporaryFile(suffix='.png', mode='wb')
-            path_in_xml.write(base64.decodestring(invoice.company_id.logo))
-            path_in_xml.flush()
-            report = AccountDocumentsElectronicReport(invoice, tipo, path_in_xml.name)
-            report.generate_pdf()
-            path_in_xml.close()
+                template = 'electronic_document.account_invoice_electronic_report_nd'
+            return self.env['report'].get_action([invoice.id], template)
 
 
 class AccountInvoiceElectronicLine(models.Model):

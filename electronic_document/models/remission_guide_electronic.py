@@ -117,16 +117,11 @@ class RemissionGuideElectronic(models.Model):
 
     @api.multi
     def print_document(self):
-        from electronic_document.reports.account_documents_electronic_report import AccountDocumentsElectronicReport
-        import base64
-        import tempfile
         for remission in self:
-            path_in_xml = tempfile.NamedTemporaryFile(suffix='.png', mode='wb')
-            path_in_xml.write(base64.decodestring(remission.company_id.logo))
-            path_in_xml.flush()
-            report = AccountDocumentsElectronicReport(remission, 'GUIAS DE REMISION', path_in_xml.name)
-            report.generate_pdf()
-            path_in_xml.close()
+            att_id = self.env['ir.attachment'].search([('res_model', '=', remission._name), ('res_id', '=', remission.id)])
+            if att_id:
+                att_id.unlink()
+            return self.env['report'].get_action([remission.id], 'electronic_document.remission_guide_electronic_report')
 
     @api.multi
     def send_mail_document(self):
