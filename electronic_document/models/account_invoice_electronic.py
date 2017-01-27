@@ -94,11 +94,12 @@ class AccountInvoiceElectronic(models.Model):
 
     @api.one
     @api.depends('line_id.total', 'line_id.price_unit', 'line_id.quantity', 'line_id.discount', 'tax_comp',
-                 'modification_value')
+                 'modification_value', 'total_discount')
     def _get_total_invoice(self):
         tax = 0.0
+        type = self._context['type']
         subtotal_taxed = subtotal_0 = 0.0
-        if self.type == 'debito':
+        if type == 'debito':
             subtotal_taxed = self.modification_value
             tax += self.modification_value * 0.14
         else:
@@ -111,8 +112,8 @@ class AccountInvoiceElectronic(models.Model):
         self.taxed = tax
         self.subtotal_taxed = subtotal_taxed
         self.subtotal_0 = subtotal_0
-        self.subtotal_taxed = subtotal_taxed + subtotal_0
-        self.total = tax + subtotal_taxed + subtotal_0 - self.tax_comp
+        self.subtotal = subtotal_taxed + subtotal_0
+        self.total = tax + subtotal_taxed + subtotal_0 - self.tax_comp - self.total_discount
 
     @api.multi
     def change_state_to(self):
@@ -231,5 +232,6 @@ class AccountInvoiceElectronicLine(models.Model):
     invoice_id = fields.Many2one('account.invoice.electronic', string="Facturas")
 
     @api.one
+    @api.depends('quantity', 'price_unit', 'discount')
     def _get_total_line(self):
         self.total = self.quantity * self.price_unit - self.discount
