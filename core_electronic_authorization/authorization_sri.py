@@ -10,6 +10,7 @@ from suds.client import Client
 import random
 import re
 import os
+import platform
 import base64
 from datetime import datetime
 
@@ -519,9 +520,12 @@ class DigitalSignature(models.Model):
 
     @api.model
     def create(self, values):
+        path = os.getcwd()
+        if platform.system().lower() == 'linux':
+            os.popen('chmod 777 ' + path)
         with open(values.get('name'), 'w+') as fp:
             fp.write(base64.b64decode(values['electronic_signature']))
-        values['path_digital_signature'] = os.getcwd() + '/' + values.get('name')
+        values['path_digital_signature'] = path + '/' + values.get('name')
         return super(DigitalSignature, self).create(values)
 
     @api.model
@@ -532,7 +536,10 @@ class DigitalSignature(models.Model):
     @api.one
     def write(self, values):
         if 'electronic_signature' in values:
+            path = os.getcwd()
+            if platform.system().lower() == 'linux':
+                os.popen('chmod 777 ' + path)
             with open(values.get('name'), 'w+') as fp:
                 fp.write(base64.b64decode(values['electronic_signature']))
-            values['path_digital_signature'] = os.getcwd() + '/' + values.get('name')
+            values['path_digital_signature'] = path + '/' + values.get('name')
         return super(DigitalSignature, self).write(values)

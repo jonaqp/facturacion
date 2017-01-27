@@ -60,7 +60,7 @@ class AccountWithholdElectronic(models.Model):
 
     @api.one
     def change_access_key(self):
-        access_key = generate_access_key(self, self)
+        access_key = generate_access_key(self, self, self.number)
         self.write({'access_key': access_key, 'electronic_authorization': access_key})
 
     @api.multi
