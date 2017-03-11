@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="account_withhod_electronic_report">
+            <div class="page">
+                <div class="row">
+                    <div class="col-xs-6">
+                        <img t-if="o.company_id.logo" t-att-src="'data:image/png;base64,%s' % o.company_id.logo"
+                            align="left" style="width: 300px"/>
+                    </div>
+                    <div class="col-xs-6" align="center">
+                        <h2>COTIZACIÓN</h2>
+                    </div>
+                </div>
+                <br/><br/><br/><br/>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <span t-field="o.company_id.comercial_name"/><br/>
+                        RUC <span t-field="o.company_id.vat"/><br/>
+                        <span t-if="o.company_id.street" t-field="o.company_id.street"/><br/>
+                        <span t-if="o.company_id.street2">
+                            <span t-field="o.company_id.street2"/><br/>
+                        </span>
+                        PBX: <span t-field="o.company_id.phone"/><br/>
+                        <span t-field="o.company_id.city"/> - <span t-field="o.company_id.country_id.name"/>
+                    </div>
+                    <div class="col-xs-6">
+                        OFERTA #: <span t-field="o.name"/> - <span t-field="o.partner_id.name"/><br/>
+                        FECHA: <span t-field="o.date_order"/><br/>
+                        VALIDEZ: 15 días <br/>
+                        EMAIL: <span t-field="o.user_id.partner_id.email"/>
+                    </div>
+                </div>
+                <br/><br/>
+                <div>ATTE.: <span t-field="o.atte"/></div>
+                <br/><br/>
+                <div class="row" t-if="o.order_line_service" style="font-size:11px;margin-left:6px;margin-right:6px;">
+                    <span align="left"><strong>CONTRATOS Y SERVICIOS</strong></span><br/><br/>
+                    <table style="width:100%; border:1px solid #000000;border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">CANT</th>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">ITEM</th>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">DESCRIPCIÓN</th>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">P.V.P</th>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;" groups="sale.group_discount_per_so_line">DESC.(%)</th>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">SUBT.</th>
+                            </tr>
+                       </thead>
+                       <tbody >
+                            <tr t-foreach="o.order_line_service" t-as="s">
+                                <td class="text-center" style="border:1px solid #000000;">
+                                   <span t-esc="'{:.1f}'.format(s.product_uom_qty)"/>
+                                </td>
+                                <td class="text-left" style="border:1px solid #000000;">
+                                    <span t-field="s.product_id.default_code"/>
+                                </td>
+                                <td class="text-left" style="border:1px solid #000000;">
+                                    <span t-field="s.name"/>
+                                </td>
+                                <td class="text-right" style="border:1px solid #000000;">
+                                    <span t-field="s.price_unit"
+                                    t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
+                                </td>
+                                <td class="text-center" style="border:1px solid #000000;" groups="sale.group_discount_per_so_line">
+                                    <span t-field="s.discount"/>
+                                </td>
+                                <td class="text-center" style="border:1px solid #000000;">
+                                    <span t-field="s.price_subtotal"
+                                        t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <br/>
+                    <div t-if="o.order_line_service" class="pull-right" style="width:25%; border:1px solid #000000;font-size:11px;">
+                        <table style="margin-right:5px;width:100%;">
+                            <tr>
+                                <td>DESCUENTO TOTAL</td>
+                                <td class="text-right">$ <span t-esc="'{:8.2f}'.format(o.total_descuento_contrato)" t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/></td>
+                            </tr>
+                            <tr>
+                                <td>SUBTOTAL</td>
+                                <td class="text-right">
+                                    <t t-set="total" t-value="o.base_iva_0_contrato + o.base_iva_12_contrato"/>
+                                    $ <span class="text-right" t-esc="'{:8.2f}'.format(total)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>IVA</td>
+                                <td class="text-right">
+                                    $ <span class="text-right" t-esc="'{:8.2f}'.format(o.iva_contrato)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>TOTAL</td>
+                                <td class="text-right">
+                                    $ <span class="text-right" t-esc="'{:8.2f}'.format(o.amount_total_contrato)"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row" t-if="o.order_line" style="font-size:11px;margin-left:6px;margin-right:6px;">
+                    <span align="left"><strong>INSTALACIÓN, CONFIGURACIÓN E IMPLEMENTACIÓN</strong></span><br/><br/>
+                    <table style="width:100%; border:1px solid #000000;">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">CANT</th>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">ITEM</th>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">PAGO</th>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">DESCRIPCIÓN</th>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">P.V.P</th>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;" groups="sale.group_discount_per_so_line">DESC.(%)</th>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">SUBT.</th>
+                            </tr>
+                       </thead>
+                       <tbody>
+                            <tr t-foreach="o.order_line" t-as="l">
+                                <td class="text-center" style="border:1px solid #000000;">
+                                   <span t-esc="'{:.1f}'.format(l.product_uom_qty)"/>
+                                </td>
+                                <td class="text-center" style="border:1px solid #000000;">
+                                    <span t-field="l.product_id.default_code"/>
+                                </td>
+                                <td class="text-center" style="border:1px solid #000000;">ÚNICO</td>
+                                <td class="text-left" style="border:1px solid #000000;">
+                                    <span t-field="l.name"/>
+                                </td>
+                                <td class="text-right" style="border:1px solid #000000;">
+                                    <span t-field="l.price_unit"
+                                          t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
+                                </td>
+                                <td class="text-center" style="border:1px solid #000000;" groups="sale.group_discount_per_so_line">
+                                    <span t-esc="l.discount + l.discount_additional"/>
+                                </td>
+                                <td class="text-right" style="border:1px solid #000000;">
+                                    <span t-field="l.price_subtotal"
+                                        t-field-options='{"widget": "monetary", "display_currency": "o.pricelist_id.currency_id"}'/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <br/>
+                    <div class="pull-right" style="width:25%; border:1px solid #000000;font-size:11px;">
+                        <table style="margin-right:5px;width:100%;">
+                            <tr>
+                                <td>DESCUENTO TOTAL</td>
+                                <td class="text-right">$ <span class="text-right" t-esc="'{:8.2f}'.format(o.total_descuento)" /></td>
+                            </tr>
+                            <tr>
+                                <td>SUBTOTAL</td>
+                                <td class="text-right">
+                                    <t t-set="total" t-value="o.amount_untaxed + o.base_iva_0"/>
+                                    $ <span t-esc="'{:8.2f}'.format(total)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>IVA</td>
+                                <td class="text-right">
+                                    $ <span t-esc="'{:8.2f}'.format(o.iva)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>TOTAL</td>
+                                <td class="text-right">
+                                    $ <span t-esc="'{:8.2f}'.format(o.amount_total)" />
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <br/>
+                <div class="col-xs-12">
+                    <span><strong>Alcances:</strong></span>
+                    <p t-field="o.note"/>
+                    <br/><br/><br/><br/>
+                    <span><strong>Forma de Pago:</strong></span>
+                    <p t-field="o.payment_term.note"/>
+                </div>
+
+            </div><!-- Fin de la pagina -->
+        </template>
+
+        <template id="report_lkt_sale_order">
+            <t t-call="report.html_container">
+                <t t-foreach="doc_ids" t-as="doc_id">
+                    <t t-raw="translate_doc(doc_id, doc_model, 'partner_id.lang', 'lkt_service_contract.report_lkt_sale_order_document')"/>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

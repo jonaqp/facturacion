@@ -18,8 +18,10 @@
 			<field name="arch" type="xml">
 			<form>
 				<sheet string="Forma de Pago">
-					<field name="code"/>
-					<field name="name"/>
+					<group>
+						<field name="code"/>
+						<field name="name"/>
+					</group>
 				</sheet>
 			  </form>
 			</field>

@@ -97,7 +97,7 @@ class AccountInvoiceElectronic(models.Model):
                  'modification_value', 'total_discount')
     def _get_total_invoice(self):
         tax = 0.0
-        type = self._context['type']
+        type = self.type
         subtotal_taxed = subtotal_0 = 0.0
         if type == 'debito':
             subtotal_taxed = self.modification_value
