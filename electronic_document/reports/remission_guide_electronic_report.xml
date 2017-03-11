@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="account_withhold_electronic_report">
+    <template id="remission_guide_electronic_report">
         <div class="page">
             <t t-foreach="docs" t-as="o">
                 <div class="row">
@@ -25,27 +25,13 @@
                     </div>
 
                 </div>
-                <br/><br/>
+                <br/>
                 <div class="row" style="font-size:11px;margin-left:6px;margin-right:6px;">
                     <table style="width:100%; border:1px solid #000000;border-collapse: collapse;">
                         <tr>
-                            <td style="width:15%">Razon Social:</td>
+                            <td style="width:15%">Cliente:</td>
                             <td class="text-left" style="width:40%">
                                 <span t-esc="o.partner_id.name"/>
-                            </td>
-                            <td style="width:15%">Telefono:</td>
-                            <td class="text-left">
-                                <span t-esc="o.partner_id.phone"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Direccion:</td>
-                            <td class="text-left">
-                                <span t-esc="o.partner_id.street"/>
-                            </td>
-                            <td>Email:</td>
-                            <td class="text-left">
-                                <span t-esc="o.partner_id.email"/>
                             </td>
                         </tr>
                         <tr>
@@ -53,20 +39,47 @@
                             <td class="text-left">
                                 <span t-esc="o.partner_id.vat"/>
                             </td>
-                            <td>Fecha Emision:</td>
+                        </tr>
+                        <tr>
+                            <td>Motivo traslado:</td>
                             <td class="text-left">
-                                <span t-esc="o.emission_date"/>
+                                <span t-esc="o.transfer_motive"/>
                             </td>
                         </tr>
                         <tr>
-                            <td>Periodo Fiscal:</td>
+                            <td>Destino(Punto de llegada):</td>
                             <td class="text-left">
-                                <span t-esc="o.fiscalyear"/>
+                                <span t-esc="o.street"/>
                             </td>
-                            <td/>
-                            <td/>
-                            <td/>
-                            <td/>
+                        </tr>
+                    </table>
+                </div>
+                <br/>
+                <div class="row" style="font-size:11px;margin-left:6px;margin-right:6px;">
+                    <table style="width:100%; border:1px solid #000000;border-collapse: collapse;">
+                        <tr>
+                            <td style="width:15%">Transportista:</td>
+                            <td class="text-left" style="width:40%">
+                                <span t-esc="o.social_name"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>RUC/CI:</td>
+                            <td class="text-left">
+                                <span t-esc="o.ruc_carrier"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Placa:</td>
+                            <td class="text-left">
+                                <span t-esc="o.license_plate"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Punto de partida:</td>
+                            <td class="text-left">
+                                <span t-esc="o.start_street"/>
+                            </td>
                         </tr>
                     </table>
                 </div>
@@ -75,33 +88,17 @@
                     <table style="width:100%; border:1px solid #000000;border-collapse: collapse;">
                         <thead>
                             <tr>
-                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">Comprobante</th>
-                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">Numero</th>
-                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">Base Imponible</th>
-                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">Impuesto</th>
-                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">Porcentaje</th>
-                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">Valor Retenido</th>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;">Cantidad</th>
+                                <th class="text-center" style="border:1px solid #000000;background-color: black;color:white;width:65%">Descripcion</th>
                             </tr>
                        </thead>
-                       <tbody >
+                       <tbody>
                             <tr t-foreach="o.line_id" t-as="s">
                                 <td class="text-left" style="border:1px solid #000000;">
-                                   <span t-field="s.name"/>
+                                   <span t-field="s.quantity"/>
                                 </td>
                                 <td class="text-left" style="border:1px solid #000000;">
-                                    <span t-field="s.num_fact"/>
-                                </td>
-                                <td class="text-left" style="border:1px solid #000000;">
-                                    $ <span t-esc="s.base_amount"/>
-                                </td>
-                                <td class="text-right" style="border:1px solid #000000;">
-                                    <span t-esc="s.tax_name"/>
-                                </td>
-                                <td class="text-right" style="border:1px solid #000000;" groups="sale.group_discount_per_so_line">
-                                    $ <span t-esc="s.tax"/>
-                                </td>
-                                <td class="text-right" style="border:1px solid #000000;">
-                                    $ <span t-esc="s.tax_amount"/>
+                                    <span t-field="s.code"/>
                                 </td>
                             </tr>
                         </tbody>

@@ -9,6 +9,8 @@
              'security/ir.model.access.csv',
              'reports/report.xml',
              'reports/account_invoice_electronic_report.xml',
+             'reports/account_withhold_electronic_report.xml',
+             'reports/remission_guide_electronic_report.xml',
              'views/account_invoice_electronic_view.xml',
              'views/account_withhold_electronic_view.xml',
              'views/remission_guide_electronic.xml',

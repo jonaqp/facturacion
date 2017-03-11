@@ -44,7 +44,7 @@ class RemissionGuideElectronic(models.Model):
     partner_id = fields.Many2one("res.partner", string="Cliente", required=True, states={'authorized': [('readonly', True)],  'loaded': [('readonly', True)]})
     vat = fields.Char(string="RUC/CEDULA", related='partner_id.vat', states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, readonly=True)
     email = fields.Char(string="Email", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]}, related='partner_id.email', readonly=True)
-    street = fields.Char(string="Dirección LLegada", related='partner_id.street', readonly=True)
+    street = fields.Char(string="Dirección Llegada", related='partner_id.street', readonly=True)
     sri_response = fields.Char(string="Respuesta SRI", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     xml_report = fields.Binary(string="Archivo XML", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
     xml_name = fields.Char(string="Archivo XML", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})

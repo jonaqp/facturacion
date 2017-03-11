@@ -119,10 +119,11 @@ class AccountInvoiceElectronic(models.Model):
     def change_state_to(self):
         for invoice in self:
             total = 0.0
-            for paid in invoice.payment_ids:
-                total += paid.amount
-            if invoice.total != total:
-                raise UserError("El total de las formas de pagos es distinto al total de la factura")
+            if invoice.type != 'debito':
+                for paid in invoice.payment_ids:
+                    total += paid.amount
+                if invoice.total != total:
+                    raise UserError("El total de las formas de pagos es distinto al total de la factura")
             number = self._get_number()
             access_key = generate_access_key(self, invoice, number)
             invoice.write({'state': 'loaded', 'number': number,

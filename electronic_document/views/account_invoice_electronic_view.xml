@@ -199,8 +199,8 @@
 					<header>
 						<button name="authorization_document_button" states="loaded,unauthorized" string="Autorizar comprobante" class="oe_highlight" type="object"/>
 						<button name="send_mail_document" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />
-						<!--<button name="delete_attachment" type="object" string="Eliminar adjuntos"  class="oe_highlight" states="loaded,authorized,unauthorized" />
-						--><button name="change_state_to" string="Por Autorizar" class="oe_highlight" type="object" states="draft" />
+						<button name="print_document" type="object" string="Imprimir RIDE"  class="oe_highlight" states="loaded,authorized" />
+						<button name="change_state_to" string="Por Autorizar" class="oe_highlight" type="object" states="draft" />
 						<field name="state" widget="statusbar" statusbar_visible="draft,loaded,authorized,unauthorized" nolabel="1"/>
 					</header>
 					<sheet string="Nota crédito">
@@ -243,6 +243,22 @@
 												<field name="price_unit"/>
 												<field name="discount"/>
 												<field name="total"/>
+											</form>
+										</field>
+										<field name="payment_ids">
+											<tree string="Lineas de pago" editable="top">
+												<field name="payment_id"/>
+												<field name="amount"/>
+												<field name="plazo"/>
+												<field name="unit"/>
+											</tree>
+											<form string="Lineas de pagos" >
+												<group>
+													<field name="payment_id"/>
+													<field name="amount"/>
+													<field name="plazo"/>
+													<field name="unit"/>
+												</group>
 											</form>
 										</field>
 										 <group class="oe_subtotal_footer oe_right">
@@ -356,8 +372,8 @@
 				<header>
 					<button name="authorization_document_button" states="loaded,unauthorized"  string="Autorizar comprobante" class="oe_highlight" type="object"/>
 					<button name="send_mail_document" type="object" string="Enviar por email"  class="oe_highlight" states="loaded,authorized" />
-					<!--<button name="delete_attachment" type="object" string="Eliminar adjuntos"  class="oe_highlight" states="loaded,authorized,unauthorized" />
-					--><button name="change_state_to" string="Por Autorizar" class="oe_highlight" type="object" states="draft" />
+					<button name="print_document" type="object" string="Imprimir RIDE"  class="oe_highlight" states="loaded,authorized" />
+					<button name="change_state_to" string="Por Autorizar" class="oe_highlight" type="object" states="draft" />
 					<field name="state" widget="statusbar" statusbar_visible="draft,loaded,authorized,unauthorized" nolabel="1" />
 				</header>
 				<sheet string="Nota de débito">

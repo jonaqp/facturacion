@@ -24,8 +24,9 @@ class MailTemplate(models.Model):
         if self.model in ('account.invoice.electronic', 'account.withhold.electronic', 'remission.guide.electronic'):
             model_id = self.env[self.model].browse(res_id)
             result, report_name = model_id.xml_report, model_id.xml_name
-            if res_id in res:
-                res[res_id].setdefault('attachments', []).append((report_name, result))
-            else:
-                res.setdefault('attachments', []).append((report_name, result))
+            if result:
+                if res_id in res:
+                    res[res_id].setdefault('attachments', []).append((report_name, result))
+                else:
+                    res.setdefault('attachments', []).append((report_name, result))
         return res
