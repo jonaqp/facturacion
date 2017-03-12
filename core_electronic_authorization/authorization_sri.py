@@ -255,6 +255,12 @@ def generate_xml_invoice(invoice, environment):
             SubElement(ttimpuesto, "baseImponible").text = str(invoice.subtotal_taxed)
             SubElement(ttimpuesto, "valor").text = str(invoice.taxed)
     if type_document == "factura":
+        if invoice.tax_comp > 0:
+            compensaciones = SubElement(factura, "compensaciones")
+            compensacion = SubElement(compensaciones, "compensacion")
+            SubElement(compensacion, "codigo").text = "1"
+            SubElement(compensacion, "tarifa").text = "2"
+            SubElement(compensacion, "valor").text = str(round(invoice.tax_comp, 2))
         SubElement(factura, "propina").text = "0.0"
         SubElement(factura, "importeTotal").text = str(invoice.total)
         SubElement(factura, "moneda").text = "DOLAR"
@@ -287,7 +293,7 @@ def generate_xml_invoice(invoice, environment):
                 SubElement(dttline, "cantidad").text = str(line.quantity)
                 SubElement(dttline, "precioUnitario").text = str(line.price_unit)
                 SubElement(dttline, "descuento").text = str(line.discount)
-                SubElement(dttline, "precioTotalSinImpuesto").text = str(round(line.price_unit * line.quantity, 2))
+                SubElement(dttline, "precioTotalSinImpuesto").text = str(round(line.total, 2))
                 detalle_impuestos = SubElement(dttline, "impuestos")
                 dtle_impuesto = SubElement(detalle_impuestos, "impuesto")
                 SubElement(dtle_impuesto, "codigo").text = '2'
@@ -446,12 +452,20 @@ class WebserviceSri(models.Model):
     def send_xml_document_reception(self, xml_document):
         webservice = self.get_webservice_sri()
         sri_reception = Client(webservice.url_reception)
-        return self._format_response_sri(sri_reception.service.validarComprobante(xml_document), reception=True)
+        try:
+            response = sri_reception.service.validarComprobante(xml_document)
+        except Exception as e:
+            raise UserError("Error", "EL servicio del SRI se encuentra innactiva, favor intentar dentro de unos segundos")
+        return self._format_response_sri(response, reception=True)
 
     def send_xml_document_authorization(self, access_key):
         webservice = self.get_webservice_sri()
         sri_authorization = Client(webservice.url_authorization)
-        return self._format_response_sri(sri_authorization.service.autorizacionComprobante(claveAccesoComprobante=access_key))
+        try:
+            response = sri_authorization.service.autorizacionComprobante(claveAccesoComprobante=access_key)
+        except Exception as e:
+            raise UserError("Error", "EL servicio del SRI se encuentra innactiva, favor intentar dentro de unos segundos")
+        return self._format_response_sri(response)
 
     def update_state(self, message, url='authorization', state='down'):
         vals = {}

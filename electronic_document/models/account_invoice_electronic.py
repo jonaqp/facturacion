@@ -49,7 +49,7 @@ class AccountInvoiceElectronic(models.Model):
     subtotal = fields.Float(string="Subtotal", required=True, compute='_get_total_invoice')
     subtotal_0 = fields.Float(string="Subtotal 0%", required=True, compute='_get_total_invoice')
     subtotal_taxed = fields.Float(string="Subtotal %", compute='_get_total_invoice')
-    total_discount = fields.Float(string="Total Descuento")
+    total_discount = fields.Float(string="Total Descuento", compute='_get_total_invoice')
     taxed = fields.Float(string="Iva %", required=True, compute='_get_total_invoice')
     total = fields.Float(string="Total", required=True, compute='_get_total_invoice')
     tax_comp_bool = fields.Boolean(string="Compensacion Iva?", states={'authorized': [('readonly', True)], 'loaded': [('readonly', True)]})
@@ -94,10 +94,11 @@ class AccountInvoiceElectronic(models.Model):
 
     @api.one
     @api.depends('line_id.total', 'line_id.price_unit', 'line_id.quantity', 'line_id.discount', 'tax_comp',
-                 'modification_value', 'total_discount')
+                 'modification_value')
     def _get_total_invoice(self):
         tax = 0.0
         type = self.type
+        discount = 0.0
         subtotal_taxed = subtotal_0 = 0.0
         if type == 'debito':
             subtotal_taxed = self.modification_value
@@ -109,11 +110,13 @@ class AccountInvoiceElectronic(models.Model):
                 else:
                     subtotal_taxed += round(line.total, 2)
                     tax += round(line.total * line.tax.percentage / 100, 2)
+                discount += line.discount
         self.taxed = tax
         self.subtotal_taxed = subtotal_taxed
         self.subtotal_0 = subtotal_0
         self.subtotal = subtotal_taxed + subtotal_0
-        self.total = tax + subtotal_taxed + subtotal_0 - self.tax_comp - self.total_discount
+        self.total_discount = discount
+        self.total = tax + subtotal_taxed + subtotal_0 - self.tax_comp
 
     @api.multi
     def change_state_to(self):
