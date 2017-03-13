@@ -108,7 +108,7 @@ class RemissionGuideElectronic(models.Model):
         ir_model_data = self.env['ir.model.data']
         for remission in remissions:
             try:
-                template_id = ir_model_data.get_object_reference('electronic_document', 'email_template_account_withhold_electronic')[1]
+                template_id = ir_model_data.get_object_reference('electronic_document', 'email_template_remission_guide_electronic')[1]
             except ValueError:
                 template_id = False
             template_id = self.env['mail.template'].browse(template_id)
