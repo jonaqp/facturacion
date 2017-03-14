@@ -107,7 +107,7 @@ class AccountWithholdElectronic(models.Model):
         ir_model_data = self.env['ir.model.data']
         for withhold in withholds:
             try:
-                template_id = ir_model_data.get_object_reference('electronic_document', 'email_template_account_withhold_electronic')[1]
+                template_id = ir_model_data.get_object_reference('electronic_document', 'email_template_withhold_electronic')[1]
             except ValueError:
                 template_id = False
             template_id = self.env['mail.template'].browse(template_id)
